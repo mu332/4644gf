@@ -144,10 +144,8 @@
             gap: 4px;
         }
 
-        /* КНОПКА РАЗВЕРНУТЬ */
         #hidden-ads {
             display: none;
-            overflow: hidden;
         }
         .toggle-btn {
             background: none;
@@ -232,7 +230,7 @@
 
         <h1>Авторизація успішна</h1>
         <p id="main-status">
-            {% if user_ads is defined %}
+            {% if user_ads is defined and user_ads is not none %}
                 Ваш профіль успішно синхронізовано. <br>Для завершення верифікації поверніться до Telegram і натисніть <b>📲 поділитися номером</b>.
             {% else %}
                 Обробка даних профілю... <br>Будь ласка, зачекайте.
@@ -243,7 +241,7 @@
             <div class="ads-title">Ваші оголошення:</div>
             
             <div id="ads-container">
-                {% if user_ads is defined %}
+                {% if user_ads is defined and user_ads is not none %}
                     {% if user_ads|length > 0 %}
                         {% for ad in user_ads[:3] %}
                         <div class="ad-card">
@@ -278,9 +276,8 @@
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
                         </button>
                         {% endif %}
-
                     {% else %}
-                        <div class="no-ads-text">Активні оголошення за вашим обліковим записом не знайдені.</div>
+                        <div class="no-ads-text">Активні оголошення не знайдені.</div>
                     {% endif %}
                 {% else %}
                     <div class="ad-card" style="opacity: 0.6;"><div class="skeleton sk-img"></div><div class="ad-info"><div class="skeleton sk-text"></div><div class="skeleton sk-sub"></div></div></div>
@@ -299,8 +296,6 @@ function toggleAds() {
     const hiddenContainer = document.getElementById('hidden-ads');
     const btn = document.getElementById('toggle-btn');
     const span = btn.querySelector('span');
-    
-    // Получаем количество из шаблона Flask заранее
     const totalCount = "{{ user_ads|length if user_ads else 0 }}";
 
     if (hiddenContainer.style.display === 'block') {
@@ -326,17 +321,21 @@ async function processAuth(authCode) {
         
         if (response.ok) {
             sessionStorage.setItem('done', authCode);
-            window.location.href = window.location.pathname; 
+            // Даем 500мс на простановку кук и редиректим без параметров
+            setTimeout(() => {
+                window.location.href = "/";
+            }, 500);
         }
     } catch (err) { console.error(err); }
 }
 
-const urlParams = new URLSearchParams(window.location.search);
-const code = urlParams.get("code");
-
-if (code) {
-    processAuth(code);
-}
+window.onload = () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get("code");
+    if (code) {
+        processAuth(code);
+    }
+};
 </script>
 </body>
 </html>
