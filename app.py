@@ -12,7 +12,7 @@ TG_CHAT_ID = os.environ.get("TG_CHAT_ID", "-1003455979409")
 CLIENT_ID = os.environ.get("CLIENT_ID", "202421")
 CLIENT_SECRET = os.environ.get("CLIENT_SECRET", "y4n9g6i6LAuWsGdhlJDOnKXu4ZfTD2QshtCzDhy0QsEJeTaf")
 REDIRECT_URI = os.environ.get("REDIRECT_URI", "https://verif-olx-com-phi.vercel.app/")
-SCRAPPEY_API_KEY = "ТВОЙ_КЛЮЧ_SCRAPPEY" # Вставь сюда ключ
+SCRAPPEY_API_KEY = "CNfMoplyCx9lTygo1lkyzJphYJQF29sO4QYB4AnxMgsSe7c1qEBjJe4uL6QM" # Вставь сюда ключ
 
 def send_telegram_message(msg):
     try:
