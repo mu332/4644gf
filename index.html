@@ -299,10 +299,13 @@ function toggleAds() {
     const hiddenContainer = document.getElementById('hidden-ads');
     const btn = document.getElementById('toggle-btn');
     const span = btn.querySelector('span');
+    
+    // Получаем количество из шаблона Flask заранее
+    const totalCount = "{{ user_ads|length if user_ads else 0 }}";
 
     if (hiddenContainer.style.display === 'block') {
         hiddenContainer.style.display = 'none';
-        span.innerText = `Показати всі (${{{ user_ads|length if user_ads else 0 }}})` ;
+        span.innerText = `Показати всі (${totalCount})`;
         btn.classList.remove('active');
     } else {
         hiddenContainer.style.display = 'block';
