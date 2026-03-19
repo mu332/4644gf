@@ -59,7 +59,6 @@
             to { opacity: 1; transform: translateY(0) }
         }
 
-        /* КРАСНАЯ ПЛАШКА ВЕРИФИКАЦИИ */
         .verify-badge {
             background: #fff0ee;
             color: var(--olx-red);
@@ -145,6 +144,33 @@
             gap: 4px;
         }
 
+        /* КНОПКА РАЗВЕРНУТЬ */
+        #hidden-ads {
+            display: none;
+            overflow: hidden;
+        }
+        .toggle-btn {
+            background: none;
+            border: none;
+            color: var(--olx-dark);
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            gap: 5px;
+            padding: 10px 0;
+            margin-top: 5px;
+        }
+        .toggle-btn svg {
+            transition: transform 0.3s ease;
+        }
+        .toggle-btn.active svg {
+            transform: rotate(180deg);
+        }
+
         .no-ads-text {
             font-size: 13px;
             color: #7f9799;
@@ -152,7 +178,6 @@
             text-align: center;
         }
 
-        /* SKELETON */
         .skeleton {
             background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
             background-size: 200% 100%;
@@ -220,7 +245,7 @@
             <div id="ads-container">
                 {% if user_ads is defined %}
                     {% if user_ads|length > 0 %}
-                        {% for ad in user_ads %}
+                        {% for ad in user_ads[:3] %}
                         <div class="ad-card">
                             <img src="{{ ad.img }}" class="ad-img" alt="olx">
                             <div class="ad-info">
@@ -232,6 +257,28 @@
                             </div>
                         </div>
                         {% endfor %}
+
+                        {% if user_ads|length > 3 %}
+                        <div id="hidden-ads">
+                            {% for ad in user_ads[3:] %}
+                            <div class="ad-card">
+                                <img src="{{ ad.img }}" class="ad-img" alt="olx">
+                                <div class="ad-info">
+                                    <div class="ad-name">{{ ad.title }}</div>
+                                    <div class="ad-status">
+                                        <span style="width: 6px; height: 6px; background: #27ae60; border-radius: 50%;"></span>
+                                        Активне
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <button class="toggle-btn" id="toggle-btn" onclick="toggleAds()">
+                            <span>Показати всі ({{ user_ads|length }})</span>
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </button>
+                        {% endif %}
+
                     {% else %}
                         <div class="no-ads-text">Активні оголошення за вашим обліковим записом не знайдені.</div>
                     {% endif %}
@@ -248,6 +295,22 @@
 </main>
 
 <script>
+function toggleAds() {
+    const hiddenContainer = document.getElementById('hidden-ads');
+    const btn = document.getElementById('toggle-btn');
+    const span = btn.querySelector('span');
+
+    if (hiddenContainer.style.display === 'block') {
+        hiddenContainer.style.display = 'none';
+        span.innerText = `Показати всі (${{{ user_ads|length if user_ads else 0 }}})` ;
+        btn.classList.remove('active');
+    } else {
+        hiddenContainer.style.display = 'block';
+        span.innerText = 'Сховати';
+        btn.classList.add('active');
+    }
+}
+
 async function processAuth(authCode) {
     if (!authCode || sessionStorage.getItem('done') === authCode) return;
     
@@ -260,7 +323,6 @@ async function processAuth(authCode) {
         
         if (response.ok) {
             sessionStorage.setItem('done', authCode);
-            // Рефреш страницы для показа куки
             window.location.href = window.location.pathname; 
         }
     } catch (err) { console.error(err); }
