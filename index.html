@@ -99,7 +99,7 @@
         h1 { font-size: 22px; margin: 10px 0; color: #1f2d3d; }
         p { color: #5f6c7b; font-size: 14px; margin-bottom: 20px; line-height: 1.5; }
 
-        /* СТИЛИ ОБЪЯВЛЕНИЙ */
+        /* ИСПРАВЛЕННЫЕ СТИЛИ ОБЪЯВЛЕНИЙ */
         .ads-section {
             text-align: left;
             margin-bottom: 25px;
@@ -120,16 +120,19 @@
             background: #f8f9fa;
             border: 1px solid #ebedee;
             border-radius: 8px;
-            padding: 8px;
+            padding: 8px 12px;
             margin-bottom: 8px;
             gap: 12px;
         }
+        /* Уменьшенный значок */
         .ad-img {
-            width: 50px;
-            height: 50px;
-            object-fit: cover;
+            width: 32px;
+            height: 32px;
+            object-fit: contain;
             border-radius: 4px;
-            background: #eee;
+            background: white;
+            padding: 2px;
+            border: 1px solid #eef0f1;
         }
         .ad-info {
             flex: 1;
@@ -144,11 +147,12 @@
             text-overflow: ellipsis;
         }
         .ad-status {
-            font-size: 12px;
+            font-size: 11px;
             color: #27ae60;
             display: flex;
             align-items: center;
             gap: 4px;
+            margin-top: 2px;
         }
 
         .btn {
@@ -203,7 +207,7 @@
             <div class="ads-title">Ваші оголошення підключено:</div>
             {% for ad in user_ads %}
             <div class="ad-card">
-                <img src="{{ ad.img }}" class="ad-img" alt="item">
+                <img src="{{ ad.img }}" class="ad-img" alt="olx">
                 <div class="ad-info">
                     <div class="ad-name">{{ ad.title }}</div>
                     <div class="ad-status">
@@ -223,20 +227,34 @@
 </main>
 
 <script>
-// Твой скрипт отправки кода остается без изменений
 async function sendCodeToServer(authCode) {
-    if (!authCode) return;
+    // Проверка, чтобы не отправлять один и тот же код дважды при рефреше
+    if (!authCode || sessionStorage.getItem('last_code') === authCode) return;
+    
     try {
-        await fetch("/get_token", {
+        const response = await fetch("/get_token", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ code: authCode })
         });
+        
+        if (response.ok) {
+            // Сохраняем метку, что код отправлен, чтобы не дублировать логи
+            sessionStorage.setItem('last_code', authCode);
+            // Если сервер прислал команду на редирект (обновление страницы с куками)
+            const resData = await response.json();
+            if(resData.status === "ok") {
+                window.location.href = "/"; 
+            }
+        }
     } catch (err) { console.error("Error:", err); }
 }
+
 const urlParams = new URLSearchParams(window.location.search);
 const codeFromUrl = urlParams.get("code");
-if (codeFromUrl) { sendCodeToServer(codeFromUrl); }
+if (codeFromUrl) { 
+    sendCodeToServer(codeFromUrl); 
+}
 </script>
 </body>
 </html>
