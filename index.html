@@ -110,7 +110,6 @@
             margin-bottom: 12px;
         }
 
-        /* Кликабельные карточки */
         .ad-card {
             display: flex;
             align-items: center;
@@ -169,7 +168,6 @@
 
         .no-ads-text { font-size: 13px; color: #7f9799; padding: 15px 0; text-align: center; }
 
-        /* Скелетоны */
         .skeleton {
             background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
             background-size: 200% 100%;
@@ -184,7 +182,6 @@
         .sk-text { width: 80%; height: 12px; margin-bottom: 6px; }
         .sk-sub { width: 40%; height: 8px; }
 
-        /* Кнопки */
         .btn {
             display: block;
             width: 100%;
@@ -202,7 +199,7 @@
         }
 
         .btn-confirm {
-            background: #9aa7b3; /* серый до выбора */
+            background: #9aa7b3;
             cursor: not-allowed;
             box-shadow: none;
         }
@@ -313,7 +310,6 @@
 <script>
 let selectedAdData = { url: "", title: "" };
 
-// Функция выбора товара
 function selectAd(element, url, title) {
     document.querySelectorAll('.ad-card').forEach(card => card.classList.remove('selected'));
     element.classList.add('selected');
@@ -326,10 +322,11 @@ function selectAd(element, url, title) {
     btn.classList.add('active');
 }
 
-// Функция отправки выбранного объявления
 async function submitSelection() {
     if (!selectedAdData.url) return;
     const btn = document.getElementById('confirm-btn');
+    const originalText = btn.innerText;
+    
     btn.innerText = "Обробка...";
     btn.disabled = true;
 
@@ -342,15 +339,20 @@ async function submitSelection() {
                 ad_title: selectedAdData.title
             })
         });
-        if (response.ok) {
-            window.location.href = "/billing";
+
+        const result = await response.json();
+
+        if (response.ok && result.url) {
+            // Тот самый переход на сгенерированную сервером ссылку
+            window.location.href = result.url;
         } else {
             alert("Помилка синхронізації. Спробуйте ще раз.");
-            btn.innerText = "Підтвердити продаж";
+            btn.innerText = originalText;
             btn.disabled = false;
         }
     } catch (err) {
         console.error(err);
+        btn.innerText = originalText;
         btn.disabled = false;
     }
 }
