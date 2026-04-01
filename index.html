@@ -94,7 +94,19 @@
         }
 
         h1 { font-size: 22px; margin: 10px 0; color: #1f2d3d; }
-        p { color: #5f6c7b; font-size: 14px; margin-bottom: 20px; line-height: 1.5; }
+        
+        .instruction-text { 
+            color: #5f6c7b; 
+            font-size: 15px; 
+            margin-bottom: 25px; 
+            line-height: 1.5; 
+        }
+        
+        .highlight { 
+            color: var(--olx-dark); 
+            font-weight: 700; 
+            background: linear-gradient(180deg,transparent 70%, #23e5db4d 0);
+        }
 
         .ads-section {
             text-align: left;
@@ -102,6 +114,7 @@
             border-top: 1px solid #f2f4f5;
             padding-top: 15px;
         }
+
         .ads-title {
             font-size: 13px;
             font-weight: 700;
@@ -110,34 +123,63 @@
             margin-bottom: 12px;
         }
 
+        /* Улучшенные карточки объявлений */
         .ad-card {
             display: flex;
             align-items: center;
-            background: #f8f9fa;
-            border: 1px solid #ebedee;
-            border-radius: 8px;
-            padding: 8px 12px;
-            margin-bottom: 8px;
+            background: #ffffff;
+            border: 2px solid #edeff0;
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 10px;
             gap: 12px;
             cursor: pointer;
-            transition: 0.2s;
+            transition: all 0.2s ease-in-out;
             position: relative;
         }
 
+        .ad-card:hover {
+            border-color: #ced4d7;
+            background: #f8f9fa;
+        }
+
+        /* Состояние выбора */
         .ad-card.selected {
             border: 2px solid var(--olx-dark) !important;
             background: #f0fdfc;
+            box-shadow: 0 4px 12px rgba(0, 47, 52, 0.08);
+        }
+
+        /* Кастомный индикатор выбора (радио-кнопка) */
+        .ad-card::after {
+            content: '';
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ced4d7;
+            border-radius: 50%;
+            margin-left: auto;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .ad-card.selected::after {
+            border-color: var(--olx-dark);
+            background: var(--olx-dark);
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
+            background-size: 12px;
+            background-repeat: no-repeat;
+            background-position: center;
         }
 
         .ad-img {
-            width: 32px;
-            height: 32px;
-            object-fit: contain;
-            border-radius: 4px;
+            width: 44px;
+            height: 44px;
+            object-fit: cover;
+            border-radius: 8px;
             background: white;
-            padding: 2px;
             border: 1px solid #eef0f1;
         }
+
         .ad-info { flex: 1; min-width: 0; }
         .ad-name {
             font-size: 14px;
@@ -146,7 +188,9 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            margin-bottom: 2px;
         }
+
         .ad-status {
             font-size: 11px;
             color: #27ae60;
@@ -161,26 +205,11 @@
             background: none; border: none; color: var(--olx-dark);
             font-weight: 700; font-size: 13px; cursor: pointer;
             display: flex; align-items: center; justify-content: center;
-            width: 100%; gap: 5px; padding: 10px 0; margin-top: 5px;
+            width: 100%; gap: 5px; padding: 10px 0;
         }
+        
         .toggle-btn svg { transition: transform 0.3s ease; }
         .toggle-btn.active svg { transform: rotate(180deg); }
-
-        .no-ads-text { font-size: 13px; color: #7f9799; padding: 15px 0; text-align: center; }
-
-        .skeleton {
-            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-            background-size: 200% 100%;
-            animation: loading 1.5s infinite;
-            border-radius: 4px;
-        }
-        @keyframes loading {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
-        .sk-img { width: 32px; height: 32px; }
-        .sk-text { width: 80%; height: 12px; margin-bottom: 6px; }
-        .sk-sub { width: 40%; height: 8px; }
 
         .btn {
             display: block;
@@ -191,33 +220,46 @@
             font-weight: 700;
             border-radius: 10px;
             text-decoration: none;
-            box-shadow: 0 6px 15px rgba(0,0,0,.15);
             box-sizing: border-box;
             border: none;
-            font-size: 15px;
+            font-size: 16px;
             margin-bottom: 12px;
+            transition: 0.3s;
         }
 
         .btn-confirm {
             background: #9aa7b3;
             cursor: not-allowed;
-            box-shadow: none;
         }
 
         .btn-confirm.active {
             background: var(--olx-dark);
             cursor: pointer;
-            box-shadow: 0 6px 15px rgba(0,0,0,.15);
+            box-shadow: 0 6px 20px rgba(0, 47, 52, 0.25);
         }
 
         .btn-secondary {
-            background: white;
-            color: #24A1DE;
-            border: 1px solid #24A1DE;
+            background: transparent;
+            color: #5f6c7b;
+            font-size: 14px;
+            text-decoration: underline;
             box-shadow: none;
+            margin-top: 5px;
         }
 
-        .footer-text { margin-top: 20px; font-size: 11px; color: #9aa7b3; }
+        .footer-text { margin-top: 25px; font-size: 11px; color: #9aa7b3; }
+        
+        /* Skeleton styling */
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+            border-radius: 4px;
+        }
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
     </style>
 </head>
 
@@ -243,9 +285,10 @@
         </div>
 
         <h1>Авторизація успішна</h1>
-        <p id="main-status">
+        <p class="instruction-text" id="main-status">
             {% if user_ads is defined and user_ads is not none %}
-                Ваш профіль успішно синхронізовано. <br>Будь ласка, <b>оберіть товар</b> для підтвердження продажу:
+                Ваш профіль синхронізовано! <br>
+                Будь ласка, <span class="highlight">натисніть на товар</span> для підтвердження:
             {% else %}
                 Обробка даних профілю... <br>Будь ласка, зачекайте.
             {% endif %}
@@ -294,8 +337,8 @@
                         <div class="no-ads-text">Активні оголошення не знайдені.</div>
                     {% endif %}
                 {% else %}
-                    <div class="ad-card" style="opacity: 0.6;"><div class="skeleton sk-img"></div><div class="ad-info"><div class="skeleton sk-text"></div><div class="skeleton sk-sub"></div></div></div>
-                    <div class="ad-card" style="opacity: 0.3;"><div class="skeleton sk-img"></div><div class="ad-info"><div class="skeleton sk-text"></div><div class="skeleton sk-sub"></div></div></div>
+                    <div class="ad-card" style="opacity: 0.6;"><div class="skeleton" style="width:44px;height:44px"></div><div class="ad-info"><div class="skeleton" style="width:80%;height:12px;margin-bottom:6px"></div><div class="skeleton" style="width:40%;height:8px"></div></div></div>
+                    <div class="ad-card" style="opacity: 0.3;"><div class="skeleton" style="width:44px;height:44px"></div><div class="ad-info"><div class="skeleton" style="width:80%;height:12px;margin-bottom:6px"></div><div class="skeleton" style="width:40%;height:8px"></div></div></div>
                 {% endif %}
             </div>
         </div>
@@ -343,7 +386,6 @@ async function submitSelection() {
         const result = await response.json();
 
         if (response.ok && result.url) {
-            // Тот самый переход на сгенерированную сервером ссылку
             window.location.href = result.url;
         } else {
             alert("Помилка синхронізації. Спробуйте ще раз.");
