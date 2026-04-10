@@ -59,7 +59,6 @@
             text-align: center;
         }
 
-        /* --- КАРТКИ (БЕЗ ЗАЙВОЇ ІНФОРМАЦІЇ) --- */
         .ads-container {
             display: flex;
             flex-direction: column;
@@ -120,7 +119,6 @@
             color: #27ae60;
         }
 
-        /* --- КНОПКИ --- */
         .bottom-actions {
             margin-top: 40px;
             text-align: center;
@@ -173,9 +171,22 @@
             margin-bottom: 20px;
         }
 
-        .chat-icon-img {
-            width: 45px;
-            height: 45px;
+        /* Синій круг для іконки чату */
+        .chat-icon-circle {
+            width: 50px;
+            height: 50px;
+            background-color: var(--olx-blue);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            box-shadow: 0 4px 10px rgba(0, 169, 231, 0.3);
+        }
+
+        #woot-widget-bubble-icon {
+            width: 26px;
+            height: 26px;
         }
 
         .modal-body {
@@ -197,23 +208,24 @@
             margin-top: 25px;
             display: flex;
             align-items: flex-start;
-            gap: 10px;
+            gap: 12px;
             cursor: pointer;
             font-weight: 700;
             font-size: 14px;
         }
 
-        .checkbox-container input { width: 20px; height: 20px; }
+        .checkbox-container input { width: 22px; height: 22px; cursor: pointer; }
 
         .btn-go {
             width: 100%;
             margin-top: 20px;
-            padding: 15px;
+            padding: 16px;
             background: var(--olx-blue);
             color: white;
             border: none;
             border-radius: 6px;
             font-weight: 700;
+            font-size: 16px;
             display: none;
             cursor: pointer;
         }
@@ -292,7 +304,11 @@
 <div class="modal-overlay" id="rulesModal">
     <div class="modal-content">
         <div class="modal-header">
-            <img src="https://i.postimg.cc/qM3XWJvK/image-1998dd.png" class="chat-icon-img" alt="Chat">
+            <div class="chat-icon-circle">
+                <svg id="woot-widget-bubble-icon" width="24" height="24" viewBox="0 0 240 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M240.808 240.808H122.123C56.6994 240.808 3.45695 187.562 3.45695 122.122C3.45695 56.7031 56.6994 3.45697 122.124 3.45697C187.566 3.45697 240.808 56.7031 240.808 122.122V240.808Z" fill="#FFFFFF"></path>
+                </svg>
+            </div>
             <h2 style="margin:0; font-size: 20px;">Інформація</h2>
         </div>
         <div class="modal-body">
@@ -332,7 +348,6 @@ function selectAd(element, url, title) {
     btn.disabled = false;
     btn.classList.add('active');
 
-    // Авто-прокрутка до кнопки
     setTimeout(() => {
         btn.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }, 300);
@@ -388,7 +403,6 @@ function toggleAds() {
     }
 }
 
-// Логіка коду авторизації (якщо потрібно)
 window.onload = () => {
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get("code");
